@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">MediaPlayerAndroid</string>
     <string name="exemplo_media_player">Media player</string>
+    <string name="playPause">Pause</string>
+    <string name="next">Next</string>
+    <string name="stop">Stop</string>
+    <string name="Prev">prev</string>
 </resources>

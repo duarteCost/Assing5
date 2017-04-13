@@ -25,7 +25,7 @@ public class ActivityList extends AppCompatActivity {
         ArrayList<File> mySongs = findSongs(Environment.getExternalStorageDirectory());
         items = new String[mySongs.size()];
         for(int i = 0; i<mySongs.size(); i++){
-            toast(mySongs.get(i).getName().toString());
+            //toast(mySongs.get(i).getName().toString());
             items[i] = mySongs.get(i).getName().toString();
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,items);
@@ -52,7 +52,7 @@ public class ActivityList extends AppCompatActivity {
         return al;
     }
 
-    public void toast(String text){
+    /*public void toast(String text){
         Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-    }
+    }*/
 }
