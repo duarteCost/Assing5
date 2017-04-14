@@ -1,6 +1,7 @@
 package com.example.duarte.mediaplayerandroid;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +19,10 @@ public class ActivityList extends AppCompatActivity {
     private ListView lv;
     private String[] items;
     private boolean isPlaying = false;
+    private Context context = ActivityList.this;
+    private ArrayList adapter = new ArrayList();
+    private int img = R.drawable.play; //add
+    private int position;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -25,6 +30,7 @@ public class ActivityList extends AppCompatActivity {
         Bundle bundle = intent.getExtras();
         if(bundle != null){
             isPlaying = bundle.getBoolean("isPlaying");
+            position = bundle.getInt("position");
         }
 
         super.onCreate(savedInstanceState);
@@ -37,8 +43,12 @@ public class ActivityList extends AppCompatActivity {
             //toast(mySongs.get(i).getName().toString());
             items[i] = mySongs.get(i).getName().toString();
         }
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,items);
-        lv.setAdapter(adapter);
+
+        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,items); retired
+
+        //lv.setAdapter(adapter); retired
+        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
+        getDataInList();
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -56,6 +66,21 @@ public class ActivityList extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void getDataInList(){
+        for (int i = 0; i<items.length; i++) {
+            // Create a new object for each list item
+            playList ld = new playList();
+            ld.setTitle(items[i]);
+            // Add this object into the ArrayList myList
+            adapter.add(ld);
+        }
+        if(isPlaying){
+            playList pl = (playList) adapter.get(position);
+            pl.setImgResId(img);
+        }
+
     }
 
     public ArrayList<File> findSongs(File root){

@@ -109,6 +109,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 File file = new File(sdCard,items[position]);
                 musicTitle = (TextView)findViewById(R.id.musicTitle);
                 musicTitle.setText(items[position]);
+                musicTitle.setHorizontallyScrolling(true);
                 /*if(isPlaying){
                     player.stop();
                     player.release();
@@ -242,7 +243,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         //startActivity(new Intent(getApplicationContext(),ActivityList.class).putExtra("isPlaying", isPlaying));
 
         Intent returnListAct =new Intent(this, ActivityList.class);
-        returnListAct.putExtra("isPlaying", isPlaying);
+        returnListAct.putExtra("isPlaying", isPlaying).putExtra("position", position);
         startActivityForResult(returnListAct, 1);
         //returnListAct.putExtra("isPlaying", isPlaying);
         //setResult(Activity.RESULT_OK,returnListAct);

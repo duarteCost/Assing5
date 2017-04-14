@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/playListLv"
         android:layout_gravity="center_horizontal"
+        android:scrollbars="vertical"
         android:textFilterEnabled="false"
         android:background="@color/sss"
         android:layout_alignParentStart="true"
