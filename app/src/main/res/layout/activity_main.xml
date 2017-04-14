@@ -7,10 +7,19 @@
     tools:context="com.example.duarte.mediaplayerandroid.MainActivity">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:text="@string/exemplo_media_player"
         android:id="@+id/textV"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="100dp"
+        android:layout_height="45dp"
+        android:text="@string/Menu"
+        android:id="@+id/MenuButton"
+        android:layout_gravity="right"
+        android:onClick="returnMenu"/>
 
     <View
         android:layout_width="match_parent"

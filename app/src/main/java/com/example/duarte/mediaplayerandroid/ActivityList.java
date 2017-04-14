@@ -1,5 +1,6 @@
 package com.example.duarte.mediaplayerandroid;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -16,8 +17,16 @@ import java.util.ArrayList;
 public class ActivityList extends AppCompatActivity {
     private ListView lv;
     private String[] items;
+    private boolean isPlaying = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        if(bundle != null){
+            isPlaying = bundle.getBoolean("isPlaying");
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
 
@@ -33,7 +42,18 @@ public class ActivityList extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                startActivity(new Intent(getApplicationContext(),MainActivity.class).putExtra("position",position).putExtra("items",items));
+                if(isPlaying == false){
+                    startActivity(new Intent(getApplicationContext(),MainActivity.class).putExtra("position",position).putExtra("items",items));
+                    finish();
+                }
+                else
+                {
+                    Intent returnMainAct =new Intent();
+                    returnMainAct.putExtra("position",position).putExtra("items",items).putExtra("isPlaying", isPlaying);
+                    setResult(Activity.RESULT_OK,returnMainAct);
+                    finish();
+                }
+
             }
         });
     }

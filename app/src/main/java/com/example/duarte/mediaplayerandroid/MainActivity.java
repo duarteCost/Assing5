@@ -22,13 +22,13 @@ import java.util.ArrayList;
 public class MainActivity extends Activity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
     private MediaPlayer player;
-    private MediaPlayer nextPlayer;
     private boolean isPlaying;
     private TextView textViewTime;
     private TextView musicTitle;
     private long duration;
     private long currentTime;
     private int maxPosition;
+    private volatile Thread playingMusic;
 
     private Button playPause;
     private int position;
@@ -40,7 +40,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         Bundle bundle = intent.getExtras();
         items = bundle.getStringArray("items");
         position = bundle.getInt("position");
+        isPlaying = bundle.getBoolean("isPlaying");
         maxPosition = items.length;
+
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -50,11 +52,18 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             currentTime = savedInstanceState.getLong("currentTime");
             isPlaying = savedInstanceState.getBoolean("isPlaying");
 
-            if(isPlaying){
+            if(!isPlaying){
                 playMusic(null);
             }
         }*/
-        playMusic(null);
+        if(isPlaying){
+            stopMusic(null);
+        }
+        else
+        {
+            playMusic(null);
+        }
+
 
     }
 
@@ -100,8 +109,15 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 File file = new File(sdCard,items[position]);
                 musicTitle = (TextView)findViewById(R.id.musicTitle);
                 musicTitle.setText(items[position]);
+                /*if(isPlaying){
+                    player.stop();
+                    player.release();
+                }*/
                 player = new MediaPlayer();
                 player.setDataSource(file.getAbsolutePath().toString());
+                isPlaying = true;
+                playPause = (Button)findViewById(R.id.playPause);
+                playPause.setText("Pause");
                 player.prepareAsync();
 
 
@@ -222,6 +238,17 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         playMusic(null);
     }
 
+    public void returnMenu(View view){
+        //startActivity(new Intent(getApplicationContext(),ActivityList.class).putExtra("isPlaying", isPlaying));
+
+        Intent returnListAct =new Intent(this, ActivityList.class);
+        returnListAct.putExtra("isPlaying", isPlaying);
+        startActivityForResult(returnListAct, 1);
+        //returnListAct.putExtra("isPlaying", isPlaying);
+        //setResult(Activity.RESULT_OK,returnListAct);
+        //finish();
+    }
+
     public void updateTimeMusicThred(final long duration, final long currentTime, final TextView view){
         runOnUiThread(new Runnable() {
             @Override
@@ -255,7 +282,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
     public void updateTimeMusicThred(final MediaPlayer mediaPlayer, final TextView view){
-        new Thread(){
+
+        this.playingMusic = new Thread(){
             public void run(){
                 while(isPlaying){
                     try{
@@ -266,7 +294,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                     catch (InterruptedException e){e.printStackTrace();}
                 }
             }
-        }.start();
+        };
+        playingMusic.start();
 
     }
 
@@ -299,5 +328,22 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     public void onSeekComplete(MediaPlayer mediaPlayer) {
         Log.i("scrip", "onSeekComplete()");
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == 1) {
+            if(resultCode == Activity.RESULT_OK){
+                isPlaying=data.getBooleanExtra("isPlaying",isPlaying);
+                items = data.getStringArrayExtra("items");
+                maxPosition = items.length;
+                position = data.getIntExtra("position", position);
+                if(isPlaying){
+                    stopMusic(null);
+                    playMusic(null);
+                }
+            }
+        }
+    }//onActivityResult
 }
 
