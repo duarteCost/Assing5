@@ -48,42 +48,50 @@
         android:layout_marginBottom="5dp"
         android:background="#ddd" />
 
+    <SeekBar
+        android:id="@+id/seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/Prev"
             android:id="@+id/prevBt"
-            android:layout_weight="1"
-            android:onClick="prevMusic"/>
+            android:layout_width="56dp"
+            android:layout_height="65dp"
+            android:layout_weight="0.03"
+            android:background="@drawable/next2"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:onClick="prevMusic" />
 
         <Button
+            android:id="@+id/playPause"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/playPause"
             android:onClick="checkState"
-            android:id="@+id/playPause" />
+            android:text="@string/playPause" />
 
         <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/next"
-            android:id="@+id/nextBt"
-            android:layout_weight="1"
-            android:onClick="nextMusic"/>
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/stop"
+            android:id="@+id/button3"
+            android:layout_width="68dp"
+            android:layout_height="59dp"
+            android:background="@drawable/stop"
             android:onClick="stopMusic" />
+
+        <Button
+            android:id="@+id/nextBt"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="70dp"
+            android:layout_height="64dp"
+            android:background="@drawable/next"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:onClick="nextMusic" />
+
     </LinearLayout>
 
     <View

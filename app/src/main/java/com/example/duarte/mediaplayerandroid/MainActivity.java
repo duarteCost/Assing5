@@ -12,12 +12,16 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
+
+import android.widget.SeekBar; // Jorge
 
 public class MainActivity extends Activity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
@@ -29,6 +33,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private long currentTime;
     private int maxPosition;
     private volatile Thread playingMusic;
+
+    private SeekBar seekBar; // Jorge
 
     private Button playPause;
     private int position;
@@ -56,6 +62,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 playMusic(null);
             }
         }*/
+        initializeViews();  // Jorge
+        handleSeekbar(); // Jorge
+        seekBar.setMax((int) 20 / 1000); // Jorge
+
         if(isPlaying){
             stopMusic(null);
         }
@@ -141,6 +151,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             player.start();
             isPlaying = true;
             updateTimeMusicThred(player, textViewTime);
+
+
+
+
         }
     }
 
@@ -264,6 +278,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 String sDuraction = minute < 10 ? "0"+minute : minute+"";
                 sDuraction += ":"+(secund < 10 ? "0"+secund : secund);
 
+
+
                 //CurrentTime
                 aux = currentTime /1000;
                 minute = (int) (aux /60);
@@ -272,6 +288,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 scurrentTime += ":"+(secund < 10 ? "0"+secund : secund);
 
                 view.setText(position+1+" / "+maxPosition +"    "+sDuraction+" / " + scurrentTime);
+
+                //Jorge
+                seekBar.setMax((int) duration / 1000);
+                int mCurrentPosition = player.getCurrentPosition() / 1000;
+                seekBar.setProgress(mCurrentPosition);
+                // Fim Jorge
+
 
                 if((duration/1000)<=((currentTime/1000)+1))
                 {
@@ -323,6 +346,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         mediaPlayer.seekTo((int)currentTime);
         updateTimeMusicThred(mediaPlayer, textViewTime);
 
+
+
+
     }
 
     @Override
@@ -346,5 +372,35 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             }
         }
     }//onActivityResult
+
+
+    private void handleSeekbar(){
+      seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+           @Override
+           public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+               if (player != null && fromUser) {
+                   player.seekTo(progress * 1000);
+               }
+            }
+
+          @Override
+          public void onStartTrackingTouch(SeekBar seekBar) {
+
+          }
+
+          @Override
+          public void onStopTrackingTouch(SeekBar seekBar) {
+
+          }
+
+
+        });
+    }
+
+    private void initializeViews(){
+
+        seekBar = (SeekBar) findViewById(R.id.seekbar);
+    }
+
 }
 
