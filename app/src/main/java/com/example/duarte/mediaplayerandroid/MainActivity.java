@@ -3,7 +3,9 @@ package com.example.duarte.mediaplayerandroid;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 
 
 import android.widget.SeekBar; // Jorge
+import android.widget.VideoView;
 
 public class MainActivity extends Activity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
@@ -35,6 +38,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private volatile Thread playingMusic;
 
     private SeekBar seekBar; // Jorge
+    Button clk;// Jorge
+    VideoView videov;// Jorge
+    VideoView mVideoView2; // Jorge
 
     private Button playPause;
     private int position;
@@ -89,6 +95,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         super.onDestroy();
         if(player != null){
             player.stop();
+            videoStop(); // Jorge
             player.release();
             player = null;
         }
@@ -129,6 +136,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 isPlaying = true;
                 playPause = (Button)findViewById(R.id.playPause);
                 playPause.setText("Pause");
+
+
+                videoPlay ();// Jorge
                 player.prepareAsync();
 
 
@@ -150,6 +160,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         else{
             player.start();
             isPlaying = true;
+            videoPlay ();// Jorge
             updateTimeMusicThred(player, textViewTime);
 
 
@@ -161,6 +172,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     public void stopMusic(View view){
         if(player != null){
             player.stop();
+            videoStop(); // Jorge
             player.release();;
             player = null;
             currentTime = 0;
@@ -184,6 +196,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             isPlaying = false;
             playPause = (Button)findViewById(R.id.playPause);
             playPause.setText("Play");
+            videoPause();// Jorge
             pauseMusic(null);
         }
         else
@@ -191,6 +204,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             isPlaying = true;
             playPause = (Button)findViewById(R.id.playPause);
             playPause.setText("Pause");
+            videoPause();// Jorge
             playMusic(null);
         }
     }
@@ -374,12 +388,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }//onActivityResult
 
 
+    // Jorge
     private void handleSeekbar(){
       seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
            @Override
            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                if (player != null && fromUser) {
                    player.seekTo(progress * 1000);
+                   mVideoView2.seekTo(progress * 1000);
                }
             }
 
@@ -400,7 +416,66 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private void initializeViews(){
 
         seekBar = (SeekBar) findViewById(R.id.seekbar);
+
+
+        getWindow().setFormat(PixelFormat.UNKNOWN);
+        //displays a video file
+
+
     }
+
+    public void videoPlay ()
+    {
+        File sdCard = Environment.getExternalStorageDirectory();
+        final File file = new File(sdCard,items[position]);
+
+        mVideoView2 = (VideoView) findViewById(R.id.videoView1);
+        String uriPath = file.getAbsolutePath().toString();
+
+        if(uriPath.endsWith(".mp4")) {
+            Uri uri2 = Uri.parse(uriPath);
+            mVideoView2.setVideoURI(uri2);
+            mVideoView2.requestFocus();
+            mVideoView2.start();
+          //  player.stop();
+        }
+        else {
+            mVideoView2.stopPlayback();
+        }
+    }
+
+
+    public void videoStop ()
+    {
+        File sdCard = Environment.getExternalStorageDirectory();
+        final File file = new File(sdCard,items[position]);
+
+        VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
+        String uriPath = file.getAbsolutePath().toString();
+
+        if(uriPath.endsWith(".mp4")) {
+
+            Uri uri2 = Uri.parse(uriPath);
+            mVideoView2.setVideoURI(uri2);
+            mVideoView2.requestFocus();
+            mVideoView2.stopPlayback();
+        }
+    }
+
+    public void videoPause ()
+    {
+        File sdCard = Environment.getExternalStorageDirectory();
+        final File file = new File(sdCard,items[position]);
+
+        VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
+        String uriPath = file.getAbsolutePath().toString();
+
+        if(uriPath.endsWith(".mp4")) {
+
+            mVideoView2.pause();
+        }
+    }
+// Jorge
 
 }
 
