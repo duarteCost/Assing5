@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
 
 
 import android.widget.SeekBar; // Jorge
@@ -40,7 +42,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private SeekBar seekBar; // Jorge
     Button clk;// Jorge
     VideoView videov;// Jorge
-    VideoView mVideoView2; // Jorge
+
+    int GLOBAL_TOUCH_POSITION_X = 0;// Jorge
+    int GLOBAL_TOUCH_CURRENT_POSITION_X = 0;// Jorge
+    VideoView mVideoView2;  // Jorge
 
     private Button playPause;
     private int position;
@@ -79,6 +84,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         {
             playMusic(null);
         }
+
+
+
+
+
 
 
     }
@@ -135,7 +145,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 player.setDataSource(file.getAbsolutePath().toString());
                 isPlaying = true;
                 playPause = (Button)findViewById(R.id.playPause);
-                playPause.setText("Pause");
+                playPause.setBackgroundResource(R.drawable.pause);
+              //  playPause.setText("Pause");
 
 
                 videoPlay ();// Jorge
@@ -178,7 +189,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             currentTime = 0;
             isPlaying = false;
             playPause = (Button)findViewById(R.id.playPause);
-            playPause.setText("Play");
+            playPause.setBackgroundResource(R.drawable.play2);
+            //playPause.setText("Play");
             textViewTime.setText("");
 
         }
@@ -195,7 +207,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         if(isPlaying){
             isPlaying = false;
             playPause = (Button)findViewById(R.id.playPause);
-            playPause.setText("Play");
+            playPause.setBackgroundResource(R.drawable.play2);
+            //playPause.setText("Play");
             videoPause();// Jorge
             pauseMusic(null);
         }
@@ -203,7 +216,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         {
             isPlaying = true;
             playPause = (Button)findViewById(R.id.playPause);
-            playPause.setText("Pause");
+            playPause.setBackgroundResource(R.drawable.pause);
+           // playPause.setText("Pause");
             videoPause();// Jorge
             playMusic(null);
         }
@@ -248,7 +262,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
         stopMusic(null);
         playPause = (Button)findViewById(R.id.playPause);
-        playPause.setText("Pause");
+        playPause.setBackgroundResource(R.drawable.pause);
+        //playPause.setText("Pause");
         playMusic(null);
     }
 
@@ -263,7 +278,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
         stopMusic(null);
         playPause = (Button)findViewById(R.id.playPause);
-        playPause.setText("Pause");
+        playPause.setBackgroundResource(R.drawable.pause);
+       // playPause.setText("Pause");
         playMusic(null);
     }
 
@@ -314,6 +330,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 {
                     nextMusic(null);
                 }
+
+
             }
         });
 
@@ -426,10 +444,26 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
     public void videoPlay ()
     {
+
+
         File sdCard = Environment.getExternalStorageDirectory();
         final File file = new File(sdCard,items[position]);
+        getWindow().setFormat(PixelFormat.UNKNOWN);
+        final VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1); // Jorge
 
-        mVideoView2 = (VideoView) findViewById(R.id.videoView1);
+
+        mVideoView2.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer arg0) {
+                // restart on completion
+
+                if(isPlaying) {
+                    mVideoView2.start();
+                }
+            }
+        });
+
+
         String uriPath = file.getAbsolutePath().toString();
 
         if(uriPath.endsWith(".mp4")) {
@@ -439,10 +473,24 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             mVideoView2.start();
           //  player.stop();
         }
-        else {
-            mVideoView2.stopPlayback();
+             else
+            {
+
+               // String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphyCD;
+//giphyCD.3g2"
+                // Disc_Tunnel_4K_Motion_Background_Loop-3.3gp
+                String uriPathCD = "/sdcard/giphyCD.3g2";
+                Uri uri = Uri.parse(uriPathCD);
+                mVideoView2.setVideoURI(uri);
+                mVideoView2.requestFocus();
+                mVideoView2.start();
+
+
+
+
+            }
         }
-    }
+
 
 
     public void videoStop ()
@@ -462,6 +510,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
     }
 
+
+
     public void videoPause ()
     {
         File sdCard = Environment.getExternalStorageDirectory();
@@ -475,7 +525,129 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             mVideoView2.pause();
         }
     }
+
+
+    private String TAG = "Gesto";
+    float initialX, initialY;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        //int action = MotionEventCompat.getActionMasked(event);
+
+        //Number of touches
+        int pointerCount = event.getPointerCount();
+        if(pointerCount > 1){
+            player.stop();
+            return true;
+        }
+        else
+        if(pointerCount == 1){
+            int action = event.getActionMasked();
+            int actionIndex = event.getActionIndex();
+            String actionString =  "333";
+            TextView tv = (TextView) findViewById(R.id.editText);
+            switch (action)
+            {
+                /*case MotionEvent.ACTION_DOWN:
+                    GLOBAL_TOUCH_POSITION_X = (int) m.getX(1);
+                    actionString = "DOWN"+" current "+GLOBAL_TOUCH_CURRENT_POSITION_X+" prev "+GLOBAL_TOUCH_POSITION_X;
+                    tv.setText(actionString);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    GLOBAL_TOUCH_CURRENT_POSITION_X = 0;
+                    actionString = "UP"+" current "+GLOBAL_TOUCH_CURRENT_POSITION_X+" prev "+GLOBAL_TOUCH_POSITION_X;
+                    tv.setText(actionString);
+
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    GLOBAL_TOUCH_CURRENT_POSITION_X = (int) m.getX(1);
+                    int diff = GLOBAL_TOUCH_POSITION_X-GLOBAL_TOUCH_CURRENT_POSITION_X;
+                    actionString = "Diff "+diff+" current "+GLOBAL_TOUCH_CURRENT_POSITION_X+" prev "+GLOBAL_TOUCH_POSITION_X;
+                    tv.setText(actionString);
+
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    GLOBAL_TOUCH_POSITION_X = (int) m.getX(1);
+                    actionString = "DOWN"+" current "+GLOBAL_TOUCH_CURRENT_POSITION_X+" prev "+GLOBAL_TOUCH_POSITION_X;
+                    tv.setText(actionString);
+                    player.stop();
+
+                    break;
+                default:
+                    actionString = "";
+                    return true;*/
+
+                case MotionEvent.ACTION_DOWN:
+                    initialX = event.getX();
+                    initialY = event.getY();
+
+                    Log.d(TAG, "Action was DOWN");
+                    tv.setText("Action was DOWN");
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    Log.d(TAG, "Action was MOVE");
+                    tv.setText("Action was MOVE");
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    float finalX = event.getX();
+                    float finalY = event.getY();
+
+                    Log.d(TAG, "Action was UP");
+                    tv.setText("Action was UP");
+
+                    if (initialX < finalX) {
+                        Log.d(TAG, "Left to Right swipe performed");
+                        tv.setText("Left to Right swipe performed");
+                        nextMusic(null);
+                    }
+
+                    if (initialX > finalX) {
+                        Log.d(TAG, "Right to Left swipe performed");
+                        tv.setText("Right to Left swipe performed");
+                        prevMusic(null);
+
+                    }
+
+                    if (initialY < finalY) {
+                        Log.d(TAG, "Up to Down swipe performed");
+                        tv.setText("Up to Down swipe performed");
+                    }
+
+                    if (initialY > finalY) {
+                        Log.d(TAG, "Down to Up swipe performed");
+                        tv.setText("Down to Up swipe performed");
+                    }
+
+                    break;
+
+                case MotionEvent.ACTION_CANCEL:
+                    Log.d(TAG,"Action was CANCEL");
+                    tv.setText("Action was CANCEL");
+                    break;
+
+                case MotionEvent.ACTION_OUTSIDE:
+                    Log.d(TAG, "Movement occurred outside bounds of current screen element");
+                    tv.setText("Movement occurred outside bounds of current screen element");
+
+                    break;
+            }
+
+            pointerCount = 0;
+            return true;
+        }
+        else {
+            GLOBAL_TOUCH_POSITION_X = 0;
+            GLOBAL_TOUCH_CURRENT_POSITION_X = 0;
+            return true;
+        }
+
+    }
 // Jorge
+
+
 
 }
 

@@ -90,7 +90,7 @@ public class ActivityList extends AppCompatActivity {
             if(singleFile.isDirectory()&&!singleFile.isHidden()){
                 findSongs(singleFile);
             }
-            else if(singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv") || singleFile.getName().endsWith(".mp4")){
+            else if(singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv") || singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov") ){
                 al.add(singleFile);
             }
         }

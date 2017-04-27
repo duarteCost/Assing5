@@ -6,27 +6,13 @@
     android:orientation="vertical"
     tools:context="com.example.duarte.mediaplayerandroid.MainActivity">
 
-    <TextView
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:text="@string/exemplo_media_player"
-        android:id="@+id/textV"/>
-
     <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="100dp"
-        android:layout_height="45dp"
-        android:text="@string/Menu"
         android:id="@+id/MenuButton"
+        android:layout_width="61dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="right"
-        android:onClick="returnMenu"/>
-
-    <VideoView
-        android:id="@+id/videoView1"
-        android:layout_width="397dp"
-        android:layout_height="203dp"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:background="@drawable/list"
+        android:onClick="returnMenu" />
 
     <View
         android:layout_width="match_parent"
@@ -34,6 +20,11 @@
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:background="#ddd" />
+
+    <VideoView
+        android:id="@+id/videoView1"
+        android:layout_width="wrap_content"
+        android:layout_height="294dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -77,11 +68,10 @@
 
         <Button
             android:id="@+id/playPause"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="checkState"
-            android:text="@string/playPause" />
+            android:layout_width="135dp"
+            android:layout_height="71dp"
+            android:background="@drawable/play2"
+            android:onClick="checkState" />
 
         <Button
             android:id="@+id/button3"
@@ -114,10 +104,13 @@
         android:text=""
         android:id="@+id/textViewTime" />
 
-
-
-
-
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name" />
 
 
 </LinearLayout>
