@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -63,6 +65,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (android.os.Build.VERSION.SDK_INT >= 21) { // Jorge
+            Window window = this.getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor(this.getResources().getColor(R.color.Black_F2));
+        }
+
         textViewTime = (TextView) findViewById(R.id.textViewTime);
         /*if(savedInstanceState != null){
             duration = savedInstanceState.getLong("duration");
@@ -477,9 +486,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             {
 
                // String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphyCD;
-//giphyCD.3g2"
+//giphyCD.3gp"
                 // Disc_Tunnel_4K_Motion_Background_Loop-3.3gp
-                String uriPathCD = "/sdcard/giphyCD.3g2";
+                String uriPathCD = "/sdcard/giphyCD.3gp";
                 Uri uri = Uri.parse(uriPathCD);
                 mVideoView2.setVideoURI(uri);
                 mVideoView2.requestFocus();
@@ -520,10 +529,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
         String uriPath = file.getAbsolutePath().toString();
 
-        if(uriPath.endsWith(".mp4")) {
-
             mVideoView2.pause();
-        }
+
     }
 
 

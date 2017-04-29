@@ -1,108 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context="com.example.duarte.mediaplayerandroid.MainActivity">
-
-    <Button
-        android:id="@+id/MenuButton"
-        android:layout_width="61dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:background="@drawable/list"
-        android:onClick="returnMenu" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:background="#ddd" />
-
-    <VideoView
-        android:id="@+id/videoView1"
-        android:layout_width="wrap_content"
-        android:layout_height="294dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scrollHorizontally="true"
-        android:ellipsize="marquee"
-        android:gravity="left"
-        android:focusable="true"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:focusableInTouchMode="true"
-        android:singleLine="true"
-        android:text=""
-        android:id="@+id/musicTitle" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:background="#ddd" />
-
-    <SeekBar
-        android:id="@+id/seekbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    android:background="#F2000000"
+    android:weightSum="1">
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+       >
+    <Button
+        android:id="@+id/MenuButton"
+        android:layout_width="45dp"
+        android:layout_height="37dp"
+        android:layout_gravity="left"
+        android:background="@drawable/list"
+        android:backgroundTint="#ffffff"
+        android:onClick="returnMenu" />
 
-        <Button
-            android:id="@+id/prevBt"
-            android:layout_width="56dp"
-            android:layout_height="65dp"
-            android:layout_weight="0.03"
-            android:background="@drawable/next2"
-            android:backgroundTint="@android:color/holo_blue_dark"
-            android:onClick="prevMusic" />
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="List"
+            android:layout_gravity="center_vertical"
 
-        <Button
-            android:id="@+id/playPause"
-            android:layout_width="135dp"
-            android:layout_height="71dp"
-            android:background="@drawable/play2"
-            android:onClick="checkState" />
+            android:textColor="#ffffff"
 
-        <Button
-            android:id="@+id/button3"
-            android:layout_width="68dp"
-            android:layout_height="59dp"
-            android:background="@drawable/stop"
-            android:onClick="stopMusic" />
+            android:textSize="18sp" />
 
-        <Button
-            android:id="@+id/nextBt"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="70dp"
-            android:layout_height="64dp"
-            android:background="@drawable/next"
-            android:backgroundTint="@android:color/holo_blue_dark"
-            android:onClick="nextMusic" />
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="#ddd" />
+
 
     </LinearLayout>
+
+
+    <VideoView
+        android:id="@+id/videoView1"
+        android:layout_width="wrap_content"
+        android:layout_height="295dp" />
+
+
+    <SeekBar
+        android:id="@+id/seekbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progressTint="#ffffff"
+        android:backgroundTint="#CC000000"
+    />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_gravity="right"
+        android:textColor="#ffffff"
+
+
+        android:id="@+id/textViewTime" />
+    <TextView
+        android:id="@+id/musicTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#ffffff"
+        android:ellipsize="marquee"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="left"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:text=""
+        android:textColor="@android:color/background_light" />
+
+
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
-        android:background="#ddd" />
+        android:background="#ffffff" />
 
-    <TextView
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center_vertical">
+
+        <Button
+            android:id="@+id/nextBt"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
+            android:layout_toEndOf="@+id/playPause"
+            android:background="@drawable/next"
+            android:backgroundTint="#ffffff"
+            android:onClick="nextMusic" />
+
+        <Button
+            android:id="@+id/playPause"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/play2"
+            android:backgroundTint="#ffffff"
+            android:onClick="checkState" />
+
+        <Button
+            android:id="@+id/prevBt"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:background="@drawable/next2"
+            android:backgroundTint="#ffffff"
+            android:onClick="prevMusic"
+            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
+            android:layout_alignBaseline="@+id/playPause"
+            android:layout_alignBottom="@+id/playPause"
+            android:layout_toStartOf="@+id/playPause" />
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text=""
-        android:id="@+id/textViewTime" />
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <Button
+            android:id="@+id/soundMin"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+
+            android:background="@android:drawable/ic_lock_silent_mode"
+            android:backgroundTint="#ffffff"
+            android:onClick="nextMusic" />
+    <SeekBar
+        android:id="@+id/soundSeekbar"
+        android:layout_width="292dp"
+        android:layout_height="wrap_content"
+        android:progressTint="#ffffff"
+        android:layout_weight="0.88" />
+
+        <Button
+            android:id="@+id/soundMax"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@android:drawable/ic_lock_silent_mode_off"
+            android:backgroundTint="#ffffff" />
+    </LinearLayout>
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        />
+
+
 
     <EditText
         android:id="@+id/editText"
@@ -110,7 +179,8 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Name" />
+        android:text="Name"
+      />
 
 
 </LinearLayout>
