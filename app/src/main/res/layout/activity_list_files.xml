@@ -22,13 +22,48 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <EditText
+                android:id="@+id/txtsearch"
+                android:layout_width="match_parent"
+                android:layout_height="41dp"
+
+                android:layout_weight="1"
+
+
+                android:background="@color/White"
+                android:hint="Search"
+                android:inputType="text"
+                android:lines="1"
+                android:scrollHorizontally="true"
+                android:textColor="@color/Black_F2">
+
+                <requestFocus />
+            </EditText>
+
+            <ListView
+                android:id="@+id/playListLv"
+                android:layout_width="match_parent"
+                android:layout_height="476dp"
+                android:layout_alignParentStart="true"
+                android:layout_gravity="center_horizontal"
+                android:background="@color/sss"
+                android:scrollbars="vertical"
+                android:textFilterEnabled="false"
+                android:layout_below="@+id/txtsearch" />
+
+        </RelativeLayout>
+
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
+        android:layout_height="64dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     </android.support.v4.view.ViewPager>
 

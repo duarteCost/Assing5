@@ -45,9 +45,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     Button clk;// Jorge
     VideoView videov;// Jorge
 
-    int GLOBAL_TOUCH_POSITION_X = 0;// Jorge
-    int GLOBAL_TOUCH_CURRENT_POSITION_X = 0;// Jorge
-    VideoView mVideoView2;  // Jorge
+    private int GLOBAL_TOUCH_POSITION_X = 0;// Jorge
+    private int GLOBAL_TOUCH_CURRENT_POSITION_X = 0;// Jorge
+    private VideoView mVideoView2;  // Jorge
 
     private Button playPause;
     private int position;
@@ -295,7 +295,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     public void returnMenu(View view){
         //startActivity(new Intent(getApplicationContext(),ActivityList.class).putExtra("isPlaying", isPlaying));
 
-        Intent returnListAct =new Intent(this, ActivityList.class);
+        Intent returnListAct =new Intent(this, ListFiles.class);
         returnListAct.putExtra("isPlaying", isPlaying).putExtra("position", position);
         startActivityForResult(returnListAct, 1);
         //returnListAct.putExtra("isPlaying", isPlaying);

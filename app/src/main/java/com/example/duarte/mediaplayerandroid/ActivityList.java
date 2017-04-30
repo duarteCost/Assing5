@@ -52,6 +52,7 @@ public class ActivityList extends AppCompatActivity {
         lv = (ListView) findViewById(R.id.playListLv);
         ArrayList<File> mySongs = findSongs(Environment.getExternalStorageDirectory());
         items = new String[mySongs.size()];
+
         for(int i = 0; i<mySongs.size(); i++){
             //toast(mySongs.get(i).getName().toString());
             items[i] = mySongs.get(i).getName().toString();
