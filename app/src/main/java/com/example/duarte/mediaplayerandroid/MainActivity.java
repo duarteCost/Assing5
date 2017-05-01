@@ -43,7 +43,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private long currentTime;
     private int maxPosition;
     private volatile Thread playingMusic;
-    private volatile Thread setVolume;
+    private volatile Thread changeVolume;
+    private volatile Thread verifyNoise;
     private MediaRecorder recorder;
     private double amplitudeDb;
     private SeekBar volumeSeekbar = null;
@@ -56,7 +57,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     VideoView mVideoView2;  // Jorge
     private Button playPause;
     private int position;
+    private int countT = 0;
     private String[] items;
+    private double amplitudeDbC = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -171,6 +174,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             videoStop(); // Jorge
             player.release();
             playingMusic.interrupt();
+            verifyNoise.interrupt();
+            changeVolume.interrupt();
             player = null;
             currentTime = 0;
             isPlaying = false;
@@ -291,7 +296,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 secund = (int) (aux %60);
                 String scurrentTime = minute < 10 ? "0"+minute : minute+"";
                 scurrentTime += ":"+(secund < 10 ? "0"+secund : secund);
-                view.setText(position+1+" / "+maxPosition +"    "+sDuraction+" / " + scurrentTime + "   "+amplitudeDb);
+                view.setText(position+1+" / "+maxPosition +"    "+sDuraction+" / " + scurrentTime);
                 //Jorge
                 seekBar.setMax((int) duration / 1000);
                 int mCurrentPosition = player.getCurrentPosition() / 1000;
@@ -328,42 +333,44 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
-                    try {
-                        double amplitudeNewScale = amplitudeDb/10;
-                        int amplitude = (int)Math.round(amplitudeNewScale);
+            while (true) {
+                try {
 
-                        volumeSeekbar = (SeekBar) findViewById(R.id.soundSeekbar);
-                        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-                        volumeSeekbar.setMax(audioManager
-                                .getStreamMaxVolume(AudioManager.STREAM_MUSIC));
-                        volumeSeekbar.setProgress(amplitude);
-                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
-                                amplitude, 0);
+                    volumeSeekbar = (SeekBar) findViewById(R.id.soundSeekbar);
+                    audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                    volumeSeekbar.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+                    volumeSeekbar.setProgress(audioManager
+                                    .getStreamVolume(AudioManager.STREAM_MUSIC));
+                    volumeSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onStopTrackingTouch(SeekBar arg0) {
+                        }
 
+                        @Override
+                        public void onStartTrackingTouch(SeekBar arg0) {
+                        }
 
+                        @Override
+                        public void onProgressChanged(SeekBar arg0, int progress, boolean arg2) {
 
-                        volumeSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                            @Override
-                            public void onStopTrackingTouch(SeekBar arg0) {
-                            }
-
-                            @Override
-                            public void onStartTrackingTouch(SeekBar arg0) {
-                            }
-
-                            @Override
-                            public void onProgressChanged(SeekBar arg0, int progress, boolean arg2) {
-
-                                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
-                                        progress, 0);
-                            }
-                        });
+                            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                                    progress, 0);
+                        }
+                    });
+                    /*if(countT >= 5) {
                         Thread.sleep(10000);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        countT = countT +1;
                     }
+                    else {
+                        Thread.sleep(1000);
+                        countT = countT +1;
+                    }*/
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+            }
+
             }
         }).start();
 
@@ -381,20 +388,55 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
     public void verifyNoiseThread(){
-        new Thread(new Runnable() {
+        this.verifyNoise = new Thread(new Runnable() {
             @Override
             public void run () {
                 while(true){
                     try {
                         int amplitude = recorder.getMaxAmplitude();
                         amplitudeDb = 20 * Math.log10((double) Math.abs(amplitude));
-                        Thread.sleep(3000);
+                        if(amplitudeDb>=0) {
+                            amplitudeDbC = amplitudeDbC + amplitudeDb;
+                            countT ++;
+                        }
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
             }
-        }).start();
+        });
+        verifyNoise.start();
+    }
+
+    public void changeVolumeWithNoise(){
+
+        this.changeVolume = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        if(amplitudeDbC!=0){
+                            double amplitudeNewScale = amplitudeDbC / countT;
+                            amplitudeDbC = 0;
+                            countT = 0;
+                            amplitudeNewScale = amplitudeNewScale / 10;
+                            int amplitudeM = (int) Math.round(amplitudeNewScale);
+                            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, amplitudeM, 0);
+                            Thread.sleep(8000);
+                        }
+                        else
+                        {
+                            Thread.sleep(1000);
+                        }
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        changeVolume.start();
     }
 
     @Override
@@ -405,6 +447,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         mediaPlayer.seekTo((int)currentTime);
         updateTimeMusicThred(mediaPlayer, textViewTime);
         verifyNoiseThread();
+        changeVolumeWithNoise();
 
     }
 
