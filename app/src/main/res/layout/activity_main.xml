@@ -19,7 +19,7 @@
             android:layout_width="45dp"
             android:layout_height="37dp"
             android:layout_gravity="left"
-            android:background="@drawable/listM"
+            android:background="@drawable/listm"
             android:backgroundTint="#ffffff"
             android:onClick="returnMenu" />
 
@@ -149,12 +149,13 @@
             android:background="@android:drawable/ic_lock_silent_mode"
             android:backgroundTint="#ffffff"
             android:onClick="nextMusic" />
-    <SeekBar
-        android:id="@+id/soundSeekbar"
-        android:layout_width="292dp"
-        android:layout_height="wrap_content"
-        android:progressTint="#ffffff"
-        android:layout_weight="0.88" />
+
+        <SeekBar
+            android:id="@+id/soundSeekbar"
+            android:layout_width="292dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.88"
+            android:progressTint="#ffffff" />
 
         <Button
             android:id="@+id/soundMax"
