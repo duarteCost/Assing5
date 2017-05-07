@@ -19,7 +19,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="left"
-            android:background="@drawable/list2"
+            android:background="@drawable/menu"
             android:backgroundTint="#ffffff"
             android:onClick="returnMenu" />
 

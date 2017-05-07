@@ -59,6 +59,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private SeekBar volumeSeekbar = null;
     private AudioManager audioManager = null;
     private SeekBar seekBar; // Jorge
+
+
     Button clk;// Jorge
     VideoView videov;// Jorge
 
@@ -66,6 +68,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private int GLOBAL_TOUCH_CURRENT_POSITION_X = 0;// Jorge
     private VideoView mVideoView2;  // Jorge
     private boolean videoPlay;
+
+    private volatile Thread setVolume;
 
 
     private float x1,x2;
@@ -88,9 +92,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
         startService(new Intent(this, ServicePlayer.class));// Jorge
 
-
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        setVolume();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
         if (android.os.Build.VERSION.SDK_INT >= 21) { // Jorge
             Window window = this.getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -170,12 +175,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 player = new MediaPlayer();
                 player.setDataSource(file.getAbsolutePath().toString());
                 isPlaying = true;
+
                 playPause = (Button)findViewById(R.id.playPause);
                 playPause.setBackgroundResource(R.drawable.pause);
                 player.prepareAsync(); player.setOnCompletionListener(this);
                 player.setOnPreparedListener(this);
                 player.setOnSeekCompleteListener(this);
                 player.setOnErrorListener(this);
+                videoPlay ();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -183,6 +190,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         else{
             player.start();
             isPlaying = true;
+
             videoPlay ();// Jorge
             updateTimeMusicThred(player, textViewTime);
 
@@ -198,7 +206,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             videoStop(); // Jorge
             player.release();
             playingMusic.interrupt();
-            verifyNoise.interrupt();
+           verifyNoise.interrupt();
             changeVolume.interrupt();
             player = null;
             currentTime = 0;
@@ -267,8 +275,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
     public void nextMusic(View view){
-        stopMusic(null);
+
+
         if(isPlaying){
+            stopMusic(null);
             isPlaying = false;
             verifyArray("next");
         }
@@ -299,7 +309,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
     public void returnMenu(View view){
-        Intent returnListAct =new Intent(this, ActivityList.class);
+        Intent returnListAct =new Intent(this, ListFiles.class);
         returnListAct.putExtra("isPlaying", isPlaying).putExtra("position", position);
         startActivityForResult(returnListAct, 1);
     }
