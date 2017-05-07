@@ -16,10 +16,10 @@
 
         <Button
             android:id="@+id/MenuButton"
-            android:layout_width="45dp"
-            android:layout_height="37dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_gravity="left"
-            android:background="@drawable/listM"
+            android:background="@drawable/list2"
             android:backgroundTint="#ffffff"
             android:onClick="returnMenu" />
 

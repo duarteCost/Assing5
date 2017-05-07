@@ -114,4 +114,15 @@ public class ActivityList extends AppCompatActivity {
     /*public void toast(String text){
         Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
     }*/
+
+    public File getStoragePath() {
+        String removableStoragePath;
+        File fileList[] = new File("/storage/").listFiles();
+        for (File file : fileList) {
+            if(!file.getAbsolutePath().equalsIgnoreCase(Environment.getExternalStorageDirectory().getAbsolutePath()) && file.isDirectory() && file.canRead()) {
+                return file;
+            }
+        }
+        return Environment.getExternalStorageDirectory();
+    }
 }

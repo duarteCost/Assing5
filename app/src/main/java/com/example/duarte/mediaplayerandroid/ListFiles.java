@@ -35,6 +35,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -84,8 +85,8 @@ public class ListFiles extends AppCompatActivity {
 
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                     @Override
-                    public void onPageSelected(int position) {
-                        switch (position) {
+                    public void onPageSelected(int tab) {
+                        switch (tab) {
                             case 0:
                                 tabSelected = 0;
                                 getFiles("all");
@@ -124,7 +125,7 @@ public class ListFiles extends AppCompatActivity {
                 }
                 else
                 {
-                    Intent returnMainAct =new Intent();
+                    Intent returnMainAct = new Intent();
                     returnMainAct.putExtra("position",position).putExtra("items",items).putExtra("isPlaying", isPlaying);
                     setResult(Activity.RESULT_OK,returnMainAct);
                     finish();
@@ -278,19 +279,20 @@ public class ListFiles extends AppCompatActivity {
                 findFiles(singleFile , type);
             }
             else {
-                switch (type) {
+
+               switch (type) {
                     case "video":
-                        if(singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov") ){
+                        if((singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov")) &&  !singleFile.getName().contains("._")){
                             al.add(singleFile);
                         }
                         break;
                     case "music":
-                        if (singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv")) {
+                        if ((singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv")) &&  !singleFile.getName().contains("._")) {
                             al.add(singleFile);
                         }
                         break;
                     case "all":
-                        if(singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv") || singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov") ){
+                        if((singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv") || singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov")) &&  !singleFile.getName().contains("._") ){
                             al.add(singleFile);
                         }
                         break;
@@ -302,12 +304,25 @@ public class ListFiles extends AppCompatActivity {
         return al;
     }
 
+   public File getStoragePath() {
+        String removableStoragePath;
+        File fileList[] = new File("/storage/").listFiles();
+        for (File file : fileList) {
+            if(!file.getAbsolutePath().equalsIgnoreCase(Environment.getExternalStorageDirectory().getAbsolutePath()) && file.isDirectory() && file.canRead()) {
+                return file;
+            }
+        }
+        return Environment.getExternalStorageDirectory();
+    }
+
 
     public  void getFiles(String type){
 
 
         lv = (ListView) findViewById(R.id.playListLv);
-        ArrayList<File> mySongs = findFiles(Environment.getExternalStorageDirectory(), type);
+
+        ArrayList<File> mySongs = findFiles(getStoragePath(), type);
+
         items = new String[mySongs.size()];
         for(int i = 0; i<mySongs.size(); i++){
 
@@ -345,7 +360,7 @@ public class ListFiles extends AppCompatActivity {
                         break;
                 }
 
-               ArrayList<File> mySongs = findFiles(Environment.getExternalStorageDirectory(), type);
+               ArrayList<File> mySongs = findFiles(getStoragePath(), type);
                 search(mySongs, text);
 
                 editText.setImeActionLabel("Custom text", KeyEvent.KEYCODE_ENTER);

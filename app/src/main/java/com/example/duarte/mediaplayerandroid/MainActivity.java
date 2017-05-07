@@ -1,15 +1,23 @@
 package com.example.duarte.mediaplayerandroid;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.PixelFormat;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Environment;
+import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -24,11 +32,13 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-
+import java.util.Locale;
 
 
 import android.widget.SeekBar; // Jorge
 import android.widget.VideoView;
+
+import static android.R.attr.action;
 
 public class MainActivity extends Activity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
@@ -48,6 +58,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private int GLOBAL_TOUCH_POSITION_X = 0;// Jorge
     private int GLOBAL_TOUCH_CURRENT_POSITION_X = 0;// Jorge
     private VideoView mVideoView2;  // Jorge
+    private boolean videoPlay;
+
+
+    private float x1,x2;
+    private static final int MIN_DISTANCE = 500;
 
     private Button playPause;
     private int position;
@@ -61,6 +76,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         position = bundle.getInt("position");
         isPlaying = bundle.getBoolean("isPlaying");
         maxPosition = items.length;
+
+        startService(new Intent(this, ServicePlayer.class));// Jorge
 
 
         super.onCreate(savedInstanceState);
@@ -82,6 +99,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 playMusic(null);
             }
         }*/
+
+
+
         initializeViews();  // Jorge
         handleSeekbar(); // Jorge
         seekBar.setMax((int) 20 / 1000); // Jorge
@@ -93,6 +113,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         {
             playMusic(null);
         }
+
 
 
 
@@ -141,8 +162,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 /*player = MediaPlayer.create(MainActivity.this, R.raw.music1);
                 player.start();*/
                 //sdCard
-                File sdCard = Environment.getExternalStorageDirectory();
-                File file = new File(sdCard,items[position]);
+                File sdCard = getStoragePath();
+                File file = new File(sdCard, items[position]);
                 musicTitle = (TextView)findViewById(R.id.musicTitle);
                 musicTitle.setText(items[position]);
                 musicTitle.setHorizontallyScrolling(true);
@@ -422,8 +443,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                if (player != null && fromUser) {
                    player.seekTo(progress * 1000);
-                   mVideoView2.seekTo(progress * 1000);
+                //   mVideoView2.seekTo(progress * 1000);
                }
+              if (videoPlay && fromUser){
+                   // mVideoView2.seekTo(progress * 1000);
+               }
+
             }
 
           @Override
@@ -455,7 +480,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     {
 
 
-        File sdCard = Environment.getExternalStorageDirectory();
+        File sdCard = getStoragePath();
         final File file = new File(sdCard,items[position]);
         getWindow().setFormat(PixelFormat.UNKNOWN);
         final VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1); // Jorge
@@ -475,20 +500,20 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
         String uriPath = file.getAbsolutePath().toString();
 
-        if(uriPath.endsWith(".mp4")) {
+         if(uriPath.endsWith(".mp4")) {
+             videoPlay = true;
             Uri uri2 = Uri.parse(uriPath);
             mVideoView2.setVideoURI(uri2);
             mVideoView2.requestFocus();
             mVideoView2.start();
           //  player.stop();
-        }
-             else
+        } else
             {
-
-               // String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphyCD;
+                videoPlay = false;
+               // String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphyCD2;
 //giphyCD.3gp"
                 // Disc_Tunnel_4K_Motion_Background_Loop-3.3gp
-                String uriPathCD = "/sdcard/giphyCD.3gp";
+                String uriPathCD = getStoragePath()+"/giphyCD.3gp";
                 Uri uri = Uri.parse(uriPathCD);
                 mVideoView2.setVideoURI(uri);
                 mVideoView2.requestFocus();
@@ -504,7 +529,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
     public void videoStop ()
     {
-        File sdCard = Environment.getExternalStorageDirectory();
+        File sdCard = getStoragePath();
         final File file = new File(sdCard,items[position]);
 
         VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
@@ -523,7 +548,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
     public void videoPause ()
     {
-        File sdCard = Environment.getExternalStorageDirectory();
+        File sdCard = getStoragePath();
         final File file = new File(sdCard,items[position]);
 
         VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
@@ -534,127 +559,105 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
 
-    private String TAG = "Gesto";
-    float initialX, initialY;
+
+
+
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        //int action = MotionEventCompat.getActionMasked(event);
 
-        //Number of touches
-        int pointerCount = event.getPointerCount();
-        if(pointerCount > 1){
-            player.stop();
-            return true;
+        if(event.getPointerCount() > 1){
+            player.pause();
+
         }
-        else
-        if(pointerCount == 1){
-            int action = event.getActionMasked();
-            int actionIndex = event.getActionIndex();
-            String actionString =  "333";
-            TextView tv = (TextView) findViewById(R.id.editText);
-            switch (action)
-            {
-                /*case MotionEvent.ACTION_DOWN:
-                    GLOBAL_TOUCH_POSITION_X = (int) m.getX(1);
-                    actionString = "DOWN"+" current "+GLOBAL_TOUCH_CURRENT_POSITION_X+" prev "+GLOBAL_TOUCH_POSITION_X;
-                    tv.setText(actionString);
-                    break;
-                case MotionEvent.ACTION_UP:
-                    GLOBAL_TOUCH_CURRENT_POSITION_X = 0;
-                    actionString = "UP"+" current "+GLOBAL_TOUCH_CURRENT_POSITION_X+" prev "+GLOBAL_TOUCH_POSITION_X;
-                    tv.setText(actionString);
-
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    GLOBAL_TOUCH_CURRENT_POSITION_X = (int) m.getX(1);
-                    int diff = GLOBAL_TOUCH_POSITION_X-GLOBAL_TOUCH_CURRENT_POSITION_X;
-                    actionString = "Diff "+diff+" current "+GLOBAL_TOUCH_CURRENT_POSITION_X+" prev "+GLOBAL_TOUCH_POSITION_X;
-                    tv.setText(actionString);
-
-                    break;
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    GLOBAL_TOUCH_POSITION_X = (int) m.getX(1);
-                    actionString = "DOWN"+" current "+GLOBAL_TOUCH_CURRENT_POSITION_X+" prev "+GLOBAL_TOUCH_POSITION_X;
-                    tv.setText(actionString);
-                    player.stop();
-
-                    break;
-                default:
-                    actionString = "";
-                    return true;*/
-
+        if(event.getPointerCount() == 1) {
+            switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    initialX = event.getX();
-                    initialY = event.getY();
-
-                    Log.d(TAG, "Action was DOWN");
-                    tv.setText("Action was DOWN");
+                    player.pause();
+                    x1 = event.getX();
                     break;
-
-                case MotionEvent.ACTION_MOVE:
-                    Log.d(TAG, "Action was MOVE");
-                    tv.setText("Action was MOVE");
-                    break;
-
                 case MotionEvent.ACTION_UP:
-                    float finalX = event.getX();
-                    float finalY = event.getY();
+                    x2 = event.getX();
+                    float deltaX = x2 - x1;
+                    if (Math.abs(deltaX) > MIN_DISTANCE) {
 
-                    Log.d(TAG, "Action was UP");
-                    tv.setText("Action was UP");
-
-                    if (initialX < finalX) {
-                        Log.d(TAG, "Left to Right swipe performed");
-                        tv.setText("Left to Right swipe performed");
-                        nextMusic(null);
-                    }
-
-                    if (initialX > finalX) {
-                        Log.d(TAG, "Right to Left swipe performed");
-                        tv.setText("Right to Left swipe performed");
-                        prevMusic(null);
+                        if (deltaX < 0) {
+                            nextMusic(null);
+                            return true;
+                        }
+                        if (deltaX > 0) {
+                            prevMusic(null);
+                            return true;
+                        }
 
                     }
 
-                    if (initialY < finalY) {
-                        Log.d(TAG, "Up to Down swipe performed");
-                        tv.setText("Up to Down swipe performed");
-                    }
-
-                    if (initialY > finalY) {
-                        Log.d(TAG, "Down to Up swipe performed");
-                        tv.setText("Down to Up swipe performed");
-                    }
-
-                    break;
-
-                case MotionEvent.ACTION_CANCEL:
-                    Log.d(TAG,"Action was CANCEL");
-                    tv.setText("Action was CANCEL");
-                    break;
-
-                case MotionEvent.ACTION_OUTSIDE:
-                    Log.d(TAG, "Movement occurred outside bounds of current screen element");
-                    tv.setText("Movement occurred outside bounds of current screen element");
 
                     break;
             }
-
-            pointerCount = 0;
-            return true;
         }
-        else {
-            GLOBAL_TOUCH_POSITION_X = 0;
-            GLOBAL_TOUCH_CURRENT_POSITION_X = 0;
-            return true;
-        }
+        return super.onTouchEvent(event);
 
     }
 // Jorge
 
+    public File getStoragePath() {
+        String removableStoragePath;
+        File fileList[] = new File("/storage/").listFiles();
+        for (File file : fileList) {
+            if(!file.getAbsolutePath().equalsIgnoreCase(Environment.getExternalStorageDirectory().getAbsolutePath()) && file.isDirectory() && file.canRead()) {
+                return file;
+            }
+        }
+        return Environment.getExternalStorageDirectory();
+    }
 
+
+
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_HEADSETHOOK){
+            //handle click
+           // btnToOpenMic();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+
+
+    private void btnToOpenMic() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Change your music");
+
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_OUTPUT);
+        } catch (ActivityNotFoundException tim) {
+
+        }
+    }
+    private Button openMic;
+    private TextView showVoiceText;
+    private final int REQ_CODE_SPEECH_OUTPUT = 0;
+
+   /* @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CODE_SPEECH_OUTPUT && resultCode == RESULT_OK) {
+            ArrayList<String> voiceInText = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            showVoiceText.setText(voiceInText.get(0));
+            btnToOpenMic();
+        }
+
+    }*/
 
 }
+
+
 
