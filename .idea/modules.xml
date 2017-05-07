@@ -3,7 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Assing5.iml" filepath="$PROJECT_DIR$/Assing5.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Assing5.iml" filepath="$PROJECT_DIR$/Assing5.iml" />
       <module fileurl="file://$PROJECT_DIR$/MediaPlayerAndroid.iml" filepath="$PROJECT_DIR$/MediaPlayerAndroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

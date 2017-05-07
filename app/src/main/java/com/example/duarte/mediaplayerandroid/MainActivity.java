@@ -1,6 +1,7 @@
 package com.example.duarte.mediaplayerandroid;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -11,6 +12,7 @@ import android.content.res.AssetFileDescriptor;
 import android.graphics.PixelFormat;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
 import android.speech.RecognizerIntent;
@@ -50,7 +52,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private long currentTime;
     private int maxPosition;
     private volatile Thread playingMusic;
-
+    private volatile Thread changeVolume;
+    private volatile Thread verifyNoise;
+    private MediaRecorder recorder;
+    private double amplitudeDb;
+    private SeekBar volumeSeekbar = null;
+    private AudioManager audioManager = null;
     private SeekBar seekBar; // Jorge
     Button clk;// Jorge
     VideoView videov;// Jorge
@@ -66,7 +73,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
     private Button playPause;
     private int position;
+    private int countT = 0;
     private String[] items;
+    private double amplitudeDbC = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -88,21 +97,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor(this.getResources().getColor(R.color.Black_F2));
         }
-
-        textViewTime = (TextView) findViewById(R.id.textViewTime);
-        /*if(savedInstanceState != null){
-            duration = savedInstanceState.getLong("duration");
-            currentTime = savedInstanceState.getLong("currentTime");
-            isPlaying = savedInstanceState.getBoolean("isPlaying");
-
-            if(!isPlaying){
-                playMusic(null);
-            }
-        }*/
-
-
-
-        initializeViews();  // Jorge
+        setContentView(R.layout.activity_main);
+        textViewTime = (TextView) findViewById(R.id.textViewTime); initializeViews();  // Jorge
         handleSeekbar(); // Jorge
         seekBar.setMax((int) 20 / 1000); // Jorge
 
@@ -113,19 +109,23 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         {
             playMusic(null);
         }
-
-
-
-
-
-
-
-
+        recorder = new MediaRecorder();
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        recorder.setOutputFile("/dev/null");
+        try {
+            recorder.prepare();
+            recorder.start();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void onSaveInstanceState(Bundle output){
         super.onSaveInstanceState(output);
-
         output.putLong("duration", duration);
         output.putLong("currentTime", currentTime);
         output.putBoolean("isPlaying",isPlaying);
@@ -167,30 +167,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 musicTitle = (TextView)findViewById(R.id.musicTitle);
                 musicTitle.setText(items[position]);
                 musicTitle.setHorizontallyScrolling(true);
-                /*if(isPlaying){
-                    player.stop();
-                    player.release();
-                }*/
                 player = new MediaPlayer();
                 player.setDataSource(file.getAbsolutePath().toString());
                 isPlaying = true;
                 playPause = (Button)findViewById(R.id.playPause);
                 playPause.setBackgroundResource(R.drawable.pause);
-              //  playPause.setText("Pause");
-
-
-                videoPlay ();// Jorge
-                player.prepareAsync();
-
-
-                //assets
-                /*AssetFileDescriptor asset = getAssets().openFd("Pusho - Te Fuiste ft. Ozuna.mp3");
-                player = new MediaPlayer();
-                player.setDataSource(asset.getFileDescriptor(), asset.getStartOffset(), asset.getLength());
-                player.prepareAsync();*/
-
-
-                player.setOnCompletionListener(this);
+                player.prepareAsync(); player.setOnCompletionListener(this);
                 player.setOnPreparedListener(this);
                 player.setOnSeekCompleteListener(this);
                 player.setOnErrorListener(this);
@@ -214,7 +196,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         if(player != null){
             player.stop();
             videoStop(); // Jorge
-            player.release();;
+            player.release();
+            playingMusic.interrupt();
+            verifyNoise.interrupt();
+            changeVolume.interrupt();
             player = null;
             currentTime = 0;
             isPlaying = false;
@@ -247,7 +232,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             isPlaying = true;
             playPause = (Button)findViewById(R.id.playPause);
             playPause.setBackgroundResource(R.drawable.pause);
-           // playPause.setText("Pause");
+            // playPause.setText("Pause");
             videoPause();// Jorge
             playMusic(null);
         }
@@ -282,6 +267,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
     public void nextMusic(View view){
+        stopMusic(null);
         if(isPlaying){
             isPlaying = false;
             verifyArray("next");
@@ -290,7 +276,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         {
             verifyArray("next");
         }
-        stopMusic(null);
         playPause = (Button)findViewById(R.id.playPause);
         playPause.setBackgroundResource(R.drawable.pause);
         //playPause.setText("Pause");
@@ -309,19 +294,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         stopMusic(null);
         playPause = (Button)findViewById(R.id.playPause);
         playPause.setBackgroundResource(R.drawable.pause);
-       // playPause.setText("Pause");
+        // playPause.setText("Pause");
         playMusic(null);
     }
 
     public void returnMenu(View view){
-        //startActivity(new Intent(getApplicationContext(),ActivityList.class).putExtra("isPlaying", isPlaying));
-
-        Intent returnListAct =new Intent(this, ListFiles.class);
+        Intent returnListAct =new Intent(this, ActivityList.class);
         returnListAct.putExtra("isPlaying", isPlaying).putExtra("position", position);
         startActivityForResult(returnListAct, 1);
-        //returnListAct.putExtra("isPlaying", isPlaying);
-        //setResult(Activity.RESULT_OK,returnListAct);
-        //finish();
     }
 
     public void updateTimeMusicThred(final long duration, final long currentTime, final TextView view){
@@ -330,47 +310,37 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             public void run() {
                 int minute, secund;
                 long aux;
-
                 //Duraction
                 aux = duration /1000;
                 minute = (int) (aux /60);
                 secund = (int) (aux %60)-1;
                 String sDuraction = minute < 10 ? "0"+minute : minute+"";
                 sDuraction += ":"+(secund < 10 ? "0"+secund : secund);
-
-
-
                 //CurrentTime
                 aux = currentTime /1000;
                 minute = (int) (aux /60);
                 secund = (int) (aux %60);
                 String scurrentTime = minute < 10 ? "0"+minute : minute+"";
                 scurrentTime += ":"+(secund < 10 ? "0"+secund : secund);
-
                 view.setText(position+1+" / "+maxPosition +"    "+sDuraction+" / " + scurrentTime);
-
                 //Jorge
                 seekBar.setMax((int) duration / 1000);
                 int mCurrentPosition = player.getCurrentPosition() / 1000;
                 seekBar.setProgress(mCurrentPosition);
                 // Fim Jorge
-
-
                 if((duration/1000)<=((currentTime/1000)+1))
                 {
                     nextMusic(null);
                 }
-
-
             }
         });
-
     }
 
     public void updateTimeMusicThred(final MediaPlayer mediaPlayer, final TextView view){
 
-        this.playingMusic = new Thread(){
-            public void run(){
+        this.playingMusic = new Thread(new Runnable() {
+            @Override
+            public void run() {
                 while(isPlaying){
                     try{
                         updateTimeMusicThred(mediaPlayer.getDuration(), mediaPlayer.getCurrentPosition(), view);
@@ -380,12 +350,57 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                     catch (InterruptedException e){e.printStackTrace();}
                 }
             }
-        };
+        });
         playingMusic.start();
 
     }
 
+    private void setVolume() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+            while (true) {
+                try {
 
+                    volumeSeekbar = (SeekBar) findViewById(R.id.soundSeekbar);
+                    audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                    volumeSeekbar.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+                    volumeSeekbar.setProgress(audioManager
+                                    .getStreamVolume(AudioManager.STREAM_MUSIC));
+                    volumeSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onStopTrackingTouch(SeekBar arg0) {
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar arg0) {
+                        }
+
+                        @Override
+                        public void onProgressChanged(SeekBar arg0, int progress, boolean arg2) {
+
+                            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                                    progress, 0);
+                        }
+                    });
+                    /*if(countT >= 5) {
+                        Thread.sleep(10000);
+                        countT = countT +1;
+                    }
+                    else {
+                        Thread.sleep(1000);
+                        countT = countT +1;
+                    }*/
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            }
+        }).start();
+
+    }
     //Listners
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
@@ -398,20 +413,72 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         return false;
     }
 
+    public void verifyNoiseThread(){
+        this.verifyNoise = new Thread(new Runnable() {
+            @Override
+            public void run () {
+                while(true){
+                    try {
+                        int amplitude = recorder.getMaxAmplitude();
+                        amplitudeDb = 20 * Math.log10((double) Math.abs(amplitude));
+                        if(amplitudeDb>=0) {
+                            amplitudeDbC = amplitudeDbC + amplitudeDb;
+                            countT ++;
+                        }
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        verifyNoise.start();
+    }
+
+    public void changeVolumeWithNoise(){
+
+        this.changeVolume = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        if(amplitudeDbC!=0){
+                            double amplitudeNewScale = amplitudeDbC / countT;
+                            amplitudeDbC = 0;
+                            countT = 0;
+                            amplitudeNewScale = amplitudeNewScale / 10;
+                            int amplitudeM = (int) Math.round(amplitudeNewScale);
+                            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, amplitudeM, 0);
+                            Thread.sleep(8000);
+                        }
+                        else
+                        {
+                            Thread.sleep(1000);
+                        }
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        changeVolume.start();
+    }
+
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
         isPlaying = true;
         Log.i("scrip", "onPrepared()");
         mediaPlayer.start();
-        //mediaPlayer.setLooping(true);
-        //mediaPlayer.setNextMediaPlayer(nextPlayer);
         mediaPlayer.seekTo((int)currentTime);
         updateTimeMusicThred(mediaPlayer, textViewTime);
-
-
-
+        mediaPlayer.seekTo((int)currentTime);
+        updateTimeMusicThred(mediaPlayer, textViewTime);
+        verifyNoiseThread();
+        changeVolumeWithNoise();
 
     }
+
 
     @Override
     public void onSeekComplete(MediaPlayer mediaPlayer) {
