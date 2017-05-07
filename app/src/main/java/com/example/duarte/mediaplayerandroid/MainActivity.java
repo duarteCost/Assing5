@@ -42,6 +42,8 @@ import android.widget.VideoView;
 
 import static android.R.attr.action;
 
+
+
 public class MainActivity extends Activity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
     private MediaPlayer player;
@@ -59,6 +61,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private SeekBar volumeSeekbar = null;
     private AudioManager audioManager = null;
     private SeekBar seekBar; // Jorge
+    private final int  REQ_CODE_SPEECH_OUTPUT = 0; //Jorge
 
 
     Button clk;// Jorge
@@ -114,6 +117,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         {
             playMusic(null);
         }
+
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -128,6 +132,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             e.printStackTrace();
         }
     }
+
+
 
     public void onSaveInstanceState(Bundle output){
         super.onSaveInstanceState(output);
@@ -241,7 +247,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             playPause = (Button)findViewById(R.id.playPause);
             playPause.setBackgroundResource(R.drawable.pause);
             // playPause.setText("Pause");
-            videoPause();// Jorge
+            videoPlay();// Jorge
             playMusic(null);
         }
     }
@@ -309,6 +315,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
     public void returnMenu(View view){
+        //btnToOpenMic();
         Intent returnListAct =new Intent(this, ListFiles.class);
         returnListAct.putExtra("isPlaying", isPlaying).putExtra("position", position);
         startActivityForResult(returnListAct, 1);
@@ -498,6 +505,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+
         if (requestCode == 1) {
             if(resultCode == Activity.RESULT_OK){
                 isPlaying=data.getBooleanExtra("isPlaying",isPlaying);
@@ -509,6 +517,26 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                     playMusic(null);
                 }
             }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CODE_SPEECH_OUTPUT && resultCode == RESULT_OK) {
+            final ArrayList<String> voiceInText = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+          //  recorder.start();
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(),
+                            voiceInText.get(0),
+                            Toast.LENGTH_LONG)
+                            .show();
+                }
+            });
+
+            executeCommand(voiceInText);
+            //showVoiceText.setText(voiceInText.get(0));
+
         }
     }//onActivityResult
 
@@ -708,7 +736,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
 
     private void btnToOpenMic() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+       recorder.stop();
+
+       Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Change your music");
@@ -719,9 +749,53 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
         }
     }
-    private Button openMic;
-    private TextView showVoiceText;
-    private final int REQ_CODE_SPEECH_OUTPUT = 0;
+
+
+    public void executeCommand(ArrayList<String> voiceInText){
+
+        if(voiceInText.get(0).contains("next")){
+            nextMusic(null);
+        }
+        if(voiceInText.get(0).contains("prev")){
+            prevMusic(null);
+        }
+        if(voiceInText.get(0).contains("play")){
+            search(voiceInText.get(1));
+        }
+        if(voiceInText.get(0).contains("stop")){
+            checkState(null);
+        }
+
+    }
+
+    public  void search(String text) {
+
+        ArrayList<String> mySongs2 = new ArrayList();
+
+        int size = items.length;
+        for (int i = 0; i < size; i++) {
+
+            if (items[i].contains(text)) {
+                mySongs2.add(items[i]);
+            }
+        }
+    }
+
+ /*   public  void search(String text){
+
+        int size = items.length;
+        for(int i = 0; i<size; i++){
+
+            if(items[i].contains(text)) {
+                items[i] = mySongs.get(i).getName().toString();
+            }
+        }
+
+        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
+        adapter.clear();
+        getDataInList();
+
+    }*/
 
    /* @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

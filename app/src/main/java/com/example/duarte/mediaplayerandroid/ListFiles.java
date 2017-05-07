@@ -1,9 +1,11 @@
 package com.example.duarte.mediaplayerandroid;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
+import android.speech.RecognizerIntent;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -49,6 +51,10 @@ public class ListFiles extends AppCompatActivity {
     private int position;
     private EditText editText; // Var lable Search
     private int tabSelected; // tab selected
+    ArrayList<String> auxItems =  new ArrayList();
+
+    private TextView showVoiceText;
+    private final int REQ_CODE_SPEECH_OUTPUT = 0;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -86,20 +92,21 @@ public class ListFiles extends AppCompatActivity {
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                     @Override
                     public void onPageSelected(int tab) {
-                        switch (tab) {
+                     switch (tab) {
                             case 0:
                                 tabSelected = 0;
-                                getFiles("all");
+                                search(tabSelected, "mp3","mp4");
                                 break;
                             case 1:
                                 tabSelected = 1;
-                                getFiles("music");
+                                search(tabSelected, "mp3");
                                 break;
                             case 2:
                                 tabSelected = 2;
-                                getFiles("video");
+                                search(tabSelected, "mp4");
                                 break;
                         }
+
                     }
                 });
 
@@ -119,6 +126,14 @@ public class ListFiles extends AppCompatActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                items = new String[auxItems.size()];
+                for(int i = 0; i<auxItems.size(); i++){
+
+                    items[i] = auxItems.get(i);
+                }
+
+
                 if(isPlaying == false){
                     startActivity(new Intent(getApplicationContext(),MainActivity.class).putExtra("position",position).putExtra("items",items));
                     finish();
@@ -240,6 +255,7 @@ public class ListFiles extends AppCompatActivity {
             switch (position) {
                 case 0:
                     return "ALl";
+
                 case 1:
 
                     return "Music";
@@ -250,21 +266,6 @@ public class ListFiles extends AppCompatActivity {
         }
     }
 
-
-    private void getDataInList(){
-        for (int i = 0; i<items.length; i++) {
-            // Create a new object for each list item
-            playList ld = new playList();
-            ld.setTitle(items[i]);
-            // Add this object into the ArrayList myList
-            adapter.add(ld);
-        }
-        if(isPlaying){
-            playList pl = (playList) adapter.get(position);
-            pl.setImgResId(img);
-        }
-
-    }
 
 
 
@@ -278,31 +279,17 @@ public class ListFiles extends AppCompatActivity {
             if(singleFile.isDirectory()&&!singleFile.isHidden()){
                 findFiles(singleFile , type);
             }
-            else {
-
-               switch (type) {
-                    case "video":
-                        if((singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov")) &&  !singleFile.getName().contains("._")){
+            else if((singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv") || singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov")) &&  !singleFile.getName().contains("._") ){
                             al.add(singleFile);
                         }
-                        break;
-                    case "music":
-                        if ((singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv")) &&  !singleFile.getName().contains("._")) {
-                            al.add(singleFile);
-                        }
-                        break;
-                    case "all":
-                        if((singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv") || singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov")) &&  !singleFile.getName().contains("._") ){
-                            al.add(singleFile);
-                        }
-                        break;
 
 
-                }
-            }
         }
         return al;
     }
+
+
+
 
    public File getStoragePath() {
         String removableStoragePath;
@@ -331,7 +318,7 @@ public class ListFiles extends AppCompatActivity {
 
         lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
         adapter.clear();
-        getDataInList();
+        search(tabSelected, "mp3","mp4");
 
 
 
@@ -346,22 +333,8 @@ public class ListFiles extends AppCompatActivity {
             public void afterTextChanged(Editable arg0) {
                 // TODO Auto-generated method stub
                 String text = editText.getText().toString().toLowerCase(Locale.getDefault());
-                //Log.i("editText", text);
-                String type = "all";
-                switch (tabSelected) {
-                    case 0:
-                        type = "all";
-                       break;
-                    case 1:
-                        type = "music";
-                        break;
-                    case 2:
-                        type = "video";
-                        break;
-                }
 
-               ArrayList<File> mySongs = findFiles(getStoragePath(), type);
-                search(mySongs, text);
+                search(tabSelected,text);
 
                 editText.setImeActionLabel("Custom text", KeyEvent.KEYCODE_ENTER);
             }
@@ -369,6 +342,8 @@ public class ListFiles extends AppCompatActivity {
             @Override
             public void beforeTextChanged(CharSequence arg0, int arg1,
                                           int arg2, int arg3) {
+
+
                 // TODO Auto-generated method stub
 
             }
@@ -384,19 +359,83 @@ public class ListFiles extends AppCompatActivity {
 
     }
 
-    public  void search(ArrayList<File> mySongs , String text){
 
-        items = new String[mySongs.size()];
-        for(int i = 0; i<mySongs.size(); i++){
 
-            if(mySongs.get(i).getName().contains(text)) {
-                items[i] = mySongs.get(i).getName().toString();
+
+    public  void search( int type, String... params){
+
+        ArrayList<String> mySongs2 =  new ArrayList();
+
+        auxItems.clear();
+
+        for (String param : params) {
+            int size = items.length;
+            for (int i = 0; i < size; i++) {
+
+
+
+                if ((type == 0) && (items[i].contains("mp3") || items[i].contains("mp4") || items[i].contains("wmv"))) {
+                    auxItems.add(items[i]);
+                    if (items[i].contains(param)) {
+                        mySongs2.add(items[i]);
+                    }
+                } else if ((type == 1) && (items[i].contains("mp3") || items[i].contains("wnmv"))) {
+                    auxItems.add(items[i]);
+                    if (items[i].contains(param)) {
+                        mySongs2.add(items[i]);
+                    }
+                }else if ((type == 2) && (items[i].contains("mp4"))) {
+                    auxItems.add(items[i]);
+                    if (items[i].contains(param)) {
+                        mySongs2.add(items[i]);
+                    }
+                }
             }
         }
 
+
+        lv.clearFocus();
+       adapter.clear();
+
+
+        for (int i = 0; i<mySongs2.size(); i++) {
+                // Create a new object for each list item
+                playList ld = new playList();
+                ld.setTitle(mySongs2.get(i));
+                // Add this object into the ArrayList myList
+                adapter.add(ld);
+            }
+
+
         lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
-        adapter.clear();
-        getDataInList();
+
+
+
+
+
+    }
+
+    private void btnToOpenMic() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Change your music");
+
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_OUTPUT);
+        } catch (ActivityNotFoundException tim) {
+
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CODE_SPEECH_OUTPUT && resultCode == RESULT_OK) {
+            ArrayList<String> voiceInText = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            showVoiceText.setText(voiceInText.get(0));
+            btnToOpenMic();
+        }
 
     }
 
