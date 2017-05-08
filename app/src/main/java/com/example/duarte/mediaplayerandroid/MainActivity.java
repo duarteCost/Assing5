@@ -1,6 +1,7 @@
 package com.example.duarte.mediaplayerandroid;
 
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -18,6 +19,7 @@ import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -27,6 +29,7 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RemoteViews;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,6 +67,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private final int  REQ_CODE_SPEECH_OUTPUT = 0; //Jorge
 
 
+
     Button clk;// Jorge
     VideoView videov;// Jorge
 
@@ -93,12 +97,18 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         isPlaying = bundle.getBoolean("isPlaying");
         maxPosition = items.length;
 
-        startService(new Intent(this, ServicePlayer.class));// Jorge
+        //Jorge
+
+      /*  Intent intent2 = new Intent( getApplicationContext(), ServicePlayer.class );
+        intent.setAction( ServicePlayer.ACTION_PLAY );
+        startService( intent2 );*/
+
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setVolume();
         super.onCreate(savedInstanceState);
 
+        mVideoView2 = (VideoView) findViewById(R.id.videoView1); // Jorge
         if (android.os.Build.VERSION.SDK_INT >= 21) { // Jorge
             Window window = this.getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -315,10 +325,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
     public void returnMenu(View view){
-        btnToOpenMic();
-        /*Intent returnListAct =new Intent(this, ListFiles.class);
+      //  btnToOpenMic();
+        Intent returnListAct =new Intent(this, ListFiles.class);
         returnListAct.putExtra("isPlaying", isPlaying).putExtra("position", position);
-        startActivityForResult(returnListAct, 1);*/
+        startActivityForResult(returnListAct, 1);
     }
 
     public void updateTimeMusicThred(final long duration, final long currentTime, final TextView view){
@@ -521,6 +531,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQ_CODE_SPEECH_OUTPUT && resultCode == RESULT_OK) {
+
             final ArrayList<String> voiceInText = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
           //  recorder.start();
 
@@ -535,7 +546,24 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             });
 
             executeCommand(voiceInText);
-            //showVoiceText.setText(voiceInText.get(0));
+
+           // playMusic(null);
+
+            recorder = new MediaRecorder();
+            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            recorder.setOutputFile("/dev/null");
+
+            try {
+                recorder.prepare();
+                recorder.start();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
 
         }
     }//onActivityResult
@@ -548,10 +576,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                if (player != null && fromUser) {
                    player.seekTo(progress * 1000);
-                //   mVideoView2.seekTo(progress * 1000);
+
                }
               if (videoPlay && fromUser){
-                   // mVideoView2.seekTo(progress * 1000);
+                  VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
+                  mVideoView2.seekTo(progress * 1000);
+
                }
 
             }
@@ -597,7 +627,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 // restart on completion
 
                 if(isPlaying) {
-                    //player.setVolume(0,0);
                     mVideoView2.start();
                 }
             }
@@ -606,8 +635,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
         String uriPath = file.getAbsolutePath().toString();
 
-         if(uriPath.endsWith(".mp4")) {
+         if(uriPath.endsWith(".mp4") ) {
              videoPlay = true;
+             player.setVolume(0,0); // Player mute
             Uri uri2 = Uri.parse(uriPath);
             mVideoView2.setVideoURI(uri2);
             mVideoView2.requestFocus();
@@ -615,9 +645,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
           //  player.stop();
         } else
             {
-                //player.setVolume(10,10);
+
+                player.setVolume(100, 100); // Player not mute
+
                 videoPlay = false;
-               // String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphyCD2;
+                //String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphycd;
 //giphyCD.3gp"
                 // Disc_Tunnel_4K_Motion_Background_Loop-3.3gp
                 String uriPathCD = getStoragePath()+"/giphyCD.3gp";
@@ -642,6 +674,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
         String uriPath = file.getAbsolutePath().toString();
 
+
         if(uriPath.endsWith(".mp4")) {
 
             Uri uri2 = Uri.parse(uriPath);
@@ -655,13 +688,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
     public void videoPause ()
     {
-        File sdCard = getStoragePath();
-        final File file = new File(sdCard,items[position]);
-
         VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
-        String uriPath = file.getAbsolutePath().toString();
-
-            mVideoView2.pause();
+        mVideoView2.pause();
 
     }
 
@@ -730,6 +758,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         if(keyCode == KeyEvent.KEYCODE_HEADSETHOOK){
             //handle click
            // btnToOpenMic();
+            btnToOpenMic();
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -738,9 +767,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
 
     private void btnToOpenMic() {
-       recorder.stop();
+        if(isPlaying){
+            checkState(null);
+        }
+        recorder.stop();
 
-       Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Change your music");
@@ -760,10 +792,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }else if(voiceInText.get(0).contains("prev")){
             prevMusic(null);
         }else if(voiceInText.get(0).contains("play")){
-
             search(voiceInText.get(0));
         }else if(voiceInText.get(0).contains("stop")){
             checkState(null);
+        }else {
+            if(isPlaying){
+                checkState(null);
+            }
         }
 
     }
@@ -815,6 +850,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
 
     }*/
+
 
 }
 

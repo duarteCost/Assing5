@@ -13,6 +13,7 @@
             <action android:name="android.media.AUDIO_BECOMING_NOISY" />
         </intent-filter>
     </receiver>
+    <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
 
     <application
         android:allowBackup="true"
@@ -35,9 +36,11 @@
         </activity>
 
         <service
-            android:name=".ServicePlayer"
+            android:name="ServicePlayer"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="false">
+
+        </service>
     </application>
 
 </manifest>
