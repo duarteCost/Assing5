@@ -668,10 +668,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 player.setVolume(100, 100); // Player not mute
 
                 videoPlay = false;
-                //String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphycd;
+                String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphycd;
 //giphyCD.3gp"
                 // Disc_Tunnel_4K_Motion_Background_Loop-3.3gp
-                String uriPathCD = getStoragePath()+"/giphyCD.3gp";
+               // String uriPathCD = getStoragePath()+"/giphyCD.3gp";
                 Uri uri = Uri.parse(uriPathCD);
                 mVideoView2.setVideoURI(uri);
                 mVideoView2.requestFocus();
@@ -789,7 +789,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         if(isPlaying){
             checkState(null);
         }
-        recorder.stop();
+        //recorder.stop();
 
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
