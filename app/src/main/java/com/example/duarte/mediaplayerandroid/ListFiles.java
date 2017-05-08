@@ -127,6 +127,7 @@ public class ListFiles extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+
                 items = new String[auxItems.size()];
                 for(int i = 0; i<auxItems.size(); i++){
 
@@ -318,7 +319,7 @@ public class ListFiles extends AppCompatActivity {
 
         lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
         adapter.clear();
-        search(tabSelected, "mp3","mp4");
+        search(0, "mp3","mp4","wmv");
 
 
 

@@ -597,6 +597,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 // restart on completion
 
                 if(isPlaying) {
+                    //player.setVolume(0,0);
                     mVideoView2.start();
                 }
             }
@@ -614,6 +615,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
           //  player.stop();
         } else
             {
+                //player.setVolume(10,10);
                 videoPlay = false;
                // String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphyCD2;
 //giphyCD.3gp"
