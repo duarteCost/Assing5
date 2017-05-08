@@ -110,10 +110,22 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         handleSeekbar(); // Jorge
         seekBar.setMax((int) 20 / 1000); // Jorge
 
-        if(isPlaying){
-            stopMusic(null);
-        }
-        else
+        if(savedInstanceState != null){
+            if(savedInstanceState != null){
+                duration = savedInstanceState.getLong("duration");
+                currentTime = savedInstanceState.getLong("currentTime");
+                isPlaying = savedInstanceState.getBoolean("isPlaying");
+                maxPosition = savedInstanceState.getInt("maxPosition");
+                position = savedInstanceState.getInt("position");
+                //countT = savedInstanceState.getInt("countT");
+                //amplitudeDb = savedInstanceState.getDouble("amplitudeDb");
+                //amplitudeDbC = savedInstanceState.getDouble("amplitudeDbC");
+                if(isPlaying){
+                    playMusic(null);
+                }
+
+            }
+        }else
         {
             playMusic(null);
         }
@@ -139,7 +151,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         super.onSaveInstanceState(output);
         output.putLong("duration", duration);
         output.putLong("currentTime", currentTime);
-        output.putBoolean("isPlaying",isPlaying);
+        output.putBoolean("isPlaying", true);
+        output.putInt("maxPosition", maxPosition);
+        output.putInt("position", position);
+        //output.putInt("countT", countT);
+        //output.putDouble("amplitudeDb", amplitudeDb);
+        //output.putDouble("amplitudeDbC", amplitudeDbC);
+
+        recorder.stop();
     }
 
     public void onDestroy(){
