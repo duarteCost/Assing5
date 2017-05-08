@@ -52,7 +52,9 @@ public class ListFiles extends AppCompatActivity {
     private EditText editText; // Var lable Search
     private int tabSelected; // tab selected
     ArrayList<String> auxItems =  new ArrayList();
-
+    ArrayList<String> filesALll =  new ArrayList();
+    ArrayList<String> filesMusic =  new ArrayList();
+    ArrayList<String> filesVideo =  new ArrayList();
     private TextView showVoiceText;
     private final int REQ_CODE_SPEECH_OUTPUT = 0;
     /**
@@ -75,6 +77,12 @@ public class ListFiles extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_files);
 
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        if(bundle != null){
+            isPlaying = bundle.getBoolean("isPlaying");
+            position = bundle.getInt("position");
+        }
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -95,15 +103,18 @@ public class ListFiles extends AppCompatActivity {
                      switch (tab) {
                             case 0:
                                 tabSelected = 0;
-                                search(tabSelected, "mp3","mp4");
+                                setFilesList();
+                                //search(tabSelected, "mp3","mp4");
                                 break;
                             case 1:
                                 tabSelected = 1;
-                                search(tabSelected, "mp3");
+                                setFilesList();
+                                //search(tabSelected, "mp3");
                                 break;
                             case 2:
                                 tabSelected = 2;
-                                search(tabSelected, "mp4");
+                                setFilesList();
+                                //search(tabSelected, "mp4");
                                 break;
                         }
 
@@ -128,15 +139,11 @@ public class ListFiles extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
-                items = new String[auxItems.size()];
-                for(int i = 0; i<auxItems.size(); i++){
 
-                    items[i] = auxItems.get(i);
-                }
 
 
                 if(isPlaying == false){
-                    startActivity(new Intent(getApplicationContext(),MainActivity.class).putExtra("position",position).putExtra("items",items));
+                    startActivity(new Intent(getApplicationContext(),MainActivity.class).putExtra("position",searchPosition(position)).putExtra("items",items));
                     finish();
                 }
                 else
@@ -280,10 +287,12 @@ public class ListFiles extends AppCompatActivity {
             if(singleFile.isDirectory()&&!singleFile.isHidden()){
                 findFiles(singleFile , type);
             }
-            else if((singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv") || singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov")) &&  !singleFile.getName().contains("._") ){
-                            al.add(singleFile);
-                        }
+            else if((singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv") || singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov"))&& !singleFile.getName().contains("._")  ){
+                    al.add(singleFile);
 
+
+
+            }
 
         }
         return al;
@@ -311,16 +320,26 @@ public class ListFiles extends AppCompatActivity {
 
         ArrayList<File> mySongs = findFiles(getStoragePath(), type);
 
-        items = new String[mySongs.size()];
+       items = new String[mySongs.size()];
         for(int i = 0; i<mySongs.size(); i++){
 
-            items[i] = mySongs.get(i).getName().toString();
+            if(mySongs.get(i).getName().contains(".mp3") || mySongs.get(i).getName().contains(".mp4")){
+                filesALll.add(mySongs.get(i).getName().toString());
+
+            }
+            if(mySongs.get(i).getName().contains(".mp3") ){
+                filesMusic.add(mySongs.get(i).getName().toString());
+            }
+            if(mySongs.get(i).getName().contains(".mp4") ){
+                filesVideo.add(mySongs.get(i).getName().toString());
+            }
+
         }
+        setFilesList();
 
-        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
-        adapter.clear();
+      /*  adapter.clear();
         search(0, "mp3","mp4","wmv");
-
+        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add*/
 
 
     }
@@ -335,7 +354,7 @@ public class ListFiles extends AppCompatActivity {
                 // TODO Auto-generated method stub
                 String text = editText.getText().toString().toLowerCase(Locale.getDefault());
 
-                search(tabSelected,text);
+                search(text);
 
                 editText.setImeActionLabel("Custom text", KeyEvent.KEYCODE_ENTER);
             }
@@ -363,57 +382,98 @@ public class ListFiles extends AppCompatActivity {
 
 
 
-    public  void search( int type, String... params){
+    public  void search(String... params){
 
-        ArrayList<String> mySongs2 =  new ArrayList();
+        ArrayList<String> namesFiles =  new ArrayList();
 
         auxItems.clear();
+        //listVewItems.clear();
+        lv.clearFocus();
+        adapter.clear();
 
-        for (String param : params) {
-            int size = items.length;
-            for (int i = 0; i < size; i++) {
+        switch (tabSelected){
+            case 0:
+                namesFiles = filesALll;
+                break;
+            case 1:
+                namesFiles = filesMusic;
+                break;
+            case 2:
+                namesFiles = filesVideo;
+                break;
 
-
-
-                if ((type == 0) && (items[i].contains("mp3") || items[i].contains("mp4") || items[i].contains("wmv"))) {
-                    auxItems.add(items[i]);
-                    if (items[i].contains(param)) {
-                        mySongs2.add(items[i]);
-                    }
-                } else if ((type == 1) && (items[i].contains("mp3") || items[i].contains("wnmv"))) {
-                    auxItems.add(items[i]);
-                    if (items[i].contains(param)) {
-                        mySongs2.add(items[i]);
-                    }
-                }else if ((type == 2) && (items[i].contains("mp4"))) {
-                    auxItems.add(items[i]);
-                    if (items[i].contains(param)) {
-                        mySongs2.add(items[i]);
-                    }
-                }
-            }
         }
 
+        for (String param : params) {
 
-        lv.clearFocus();
-       adapter.clear();
+            for (String nameFile: namesFiles) {
+                if (nameFile.contains(param)) {
+                    playList ld = new playList();
+                    ld.setTitle(nameFile);
+                    auxItems.add(nameFile);
 
-
-        for (int i = 0; i<mySongs2.size(); i++) {
-                // Create a new object for each list item
-                playList ld = new playList();
-                ld.setTitle(mySongs2.get(i));
-                // Add this object into the ArrayList myList
-                adapter.add(ld);
-            }
-
+                    // Add this object into the ArrayList myList
+                    adapter.add(ld);
+                }
+                }
+        }
 
         lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
 
+    }
 
 
+    public void setFilesList(){
+        lv.clearFocus();
+        adapter.clear();
+        auxItems.clear();
+
+        ArrayList<String> namesFiles =  new ArrayList();
+
+        switch (tabSelected){
+            case 0:
+                namesFiles = filesALll;
+                break;
+            case 1:
+                namesFiles = filesMusic;
+                break;
+            case 2:
+                namesFiles = filesVideo;
+                break;
+
+        }
+
+        items = new String[namesFiles.size()];
+        for(int i = 0; i<namesFiles.size(); i++){
+
+            items[i] = namesFiles.get(i);
+        }
 
 
+        for (String nameFile : namesFiles) {
+
+
+                    playList ld = new playList();
+                    ld.setTitle(nameFile);
+
+                    auxItems.add(nameFile);
+                    // Add this object into the ArrayList myList
+                    adapter.add(ld);
+
+
+        }
+        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
+
+
+    }
+    public int searchPosition(int auxPosition){
+        for (int i = 0; i<items.length; i++) {
+
+           if(items[i].contains(auxItems.get(auxPosition))){
+              return i;
+            }
+        }
+        return 0;
     }
 
     private void btnToOpenMic() {

@@ -34,6 +34,7 @@ public class MyBaseAdapter extends BaseAdapter {
         return (playList) myList.get(position);
     }
 
+
     @Override
     public long getItemId(int position) {
         return 0;

@@ -315,10 +315,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
     public void returnMenu(View view){
-        //btnToOpenMic();
-        Intent returnListAct =new Intent(this, ListFiles.class);
+        btnToOpenMic();
+        /*Intent returnListAct =new Intent(this, ListFiles.class);
         returnListAct.putExtra("isPlaying", isPlaying).putExtra("position", position);
-        startActivityForResult(returnListAct, 1);
+        startActivityForResult(returnListAct, 1);*/
     }
 
     public void updateTimeMusicThred(final long duration, final long currentTime, final TextView view){
@@ -757,14 +757,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
         if(voiceInText.get(0).contains("next")){
             nextMusic(null);
-        }
-        if(voiceInText.get(0).contains("prev")){
+        }else if(voiceInText.get(0).contains("prev")){
             prevMusic(null);
-        }
-        if(voiceInText.get(0).contains("play")){
-            search(voiceInText.get(1));
-        }
-        if(voiceInText.get(0).contains("stop")){
+        }else if(voiceInText.get(0).contains("play")){
+
+            search(voiceInText.get(0));
+        }else if(voiceInText.get(0).contains("stop")){
             checkState(null);
         }
 
@@ -772,14 +770,22 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
     public  void search(String text) {
 
+        text = text.substring(5, text.length());
         ArrayList<String> mySongs2 = new ArrayList();
+        int filePosition = 0;
 
-        int size = items.length;
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < items.length; i++) {
 
             if (items[i].contains(text)) {
                 mySongs2.add(items[i]);
+                filePosition=i;
             }
+        }
+
+        if(mySongs2.size()==1){
+            position = filePosition;
+            stopMusic(null);
+            playMusic(null);
         }
     }
 

@@ -7,6 +7,7 @@ public class playList {
     String MusicTitle;
     int imgResId;
 
+
     public String getTitle() {
         return MusicTitle;
     }
