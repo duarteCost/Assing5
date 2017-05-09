@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -28,6 +29,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RemoteViews;
 import android.widget.SeekBar;
@@ -44,7 +46,7 @@ import android.widget.SeekBar; // Jorge
 import android.widget.VideoView;
 
 import static android.R.attr.action;
-
+import static android.R.attr.button;
 
 
 public class MainActivity extends Activity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
@@ -65,6 +67,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private AudioManager audioManager = null;
     private SeekBar seekBar; // Jorge
     private final int  REQ_CODE_SPEECH_OUTPUT = 0; //Jorge
+    private static boolean removed = false;
+    private LinearLayout.LayoutParams  layout;
+    private  boolean stateRecorder = true;
 
 
 
@@ -87,14 +92,20 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private int countT = 0;
     private String[] items;
     private double amplitudeDbC = 0;
+    private int tabSelected;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_main);
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         items = bundle.getStringArray("items");
         position = bundle.getInt("position");
         isPlaying = bundle.getBoolean("isPlaying");
+        tabSelected = bundle.getInt("tabSelected");
         maxPosition = items.length;
 
         //Jorge
@@ -104,9 +115,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         startService( intent2 );*/
 
 
+
+
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setVolume();
-        super.onCreate(savedInstanceState);
 
         mVideoView2 = (VideoView) findViewById(R.id.videoView1); // Jorge
         if (android.os.Build.VERSION.SDK_INT >= 21) { // Jorge
@@ -115,7 +127,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor(this.getResources().getColor(R.color.Black_F2));
         }
-        setContentView(R.layout.activity_main);
         textViewTime = (TextView) findViewById(R.id.textViewTime); initializeViews();  // Jorge
         handleSeekbar(); // Jorge
         seekBar.setMax((int) 20 / 1000); // Jorge
@@ -168,7 +179,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         //output.putDouble("amplitudeDb", amplitudeDb);
         //output.putDouble("amplitudeDbC", amplitudeDbC);
 
-        recorder.stop();
+       // recorder.stop();
     }
 
     public void onDestroy(){
@@ -208,8 +219,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 musicTitle.setText(items[position]);
                 musicTitle.setHorizontallyScrolling(true);
                 player = new MediaPlayer();
-                player.setDataSource(file.getAbsolutePath().toString());
                 isPlaying = true;
+                player.setDataSource(file.getAbsolutePath().toString());
+
 
                 playPause = (Button)findViewById(R.id.playPause);
                 playPause.setBackgroundResource(R.drawable.pause);
@@ -344,10 +356,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
     public void returnMenu(View view){
-      //  btnToOpenMic();
-        Intent returnListAct =new Intent(this, ListFiles.class);
-        returnListAct.putExtra("isPlaying", isPlaying).putExtra("position", position);
+        Intent returnListAct = new Intent(this, ListFiles.class);
+        returnListAct.putExtra("isPlaying", isPlaying).putExtra("tabSelected",tabSelected).putExtra("position", position);
         startActivityForResult(returnListAct, 1);
+
+
+
     }
 
     public void updateTimeMusicThred(final long duration, final long currentTime, final TextView view){
@@ -568,7 +582,38 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
            // playMusic(null);
 
-            recorder = new MediaRecorder();
+            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            recorder.setOutputFile("/dev/null");
+
+            try {
+                recorder.prepare();
+                recorder.start();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            verifyNoiseThread();
+            changeVolumeWithNoise();
+
+            stateRecorder = true;
+
+
+        }else {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(),
+                            "Fail",
+                            Toast.LENGTH_LONG)
+                            .show();
+                }
+            });
+
+            checkState(null);
+
             recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
@@ -583,6 +628,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 e.printStackTrace();
             }
 
+
+
+            stateRecorder = false;
 
         }
     }//onActivityResult
@@ -722,14 +770,21 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     public boolean onTouchEvent(MotionEvent event) {
 
 
-        if(event.getPointerCount() > 1){
-            player.pause();
+        if(event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) {
+            if(event.getPointerCount() > 2) {
+                btnToOpenMic();
+            }else
+            if(event.getPointerCount() == 2)
+            {
+                checkState(null);
+            }
+
 
         }
+
         if(event.getPointerCount() == 1) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    player.pause();
                     x1 = event.getX();
                     break;
                 case MotionEvent.ACTION_UP:
@@ -777,7 +832,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         if(keyCode == KeyEvent.KEYCODE_HEADSETHOOK){
             //handle click
            // btnToOpenMic();
+
             btnToOpenMic();
+
+
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -789,7 +847,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         if(isPlaying){
             checkState(null);
         }
-        //recorder.stop();
+
+        if(stateRecorder) {
+            recorder.stop();
+
+
+        }
+
+
 
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -799,6 +864,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         try {
             startActivityForResult(intent, REQ_CODE_SPEECH_OUTPUT);
         } catch (ActivityNotFoundException tim) {
+
+
 
         }
     }
@@ -869,6 +936,57 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
 
     }*/
+
+   @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
+        {
+
+           LinearLayout layoutVideo = (LinearLayout) findViewById(R.id.layoutVideo); // Jorge
+
+            //LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1000);
+
+            layoutVideo.setLayoutParams(layout);
+
+            if(removed) {
+                final LinearLayout list = (LinearLayout) findViewById(R.id.listLine);
+                final LinearLayout fullLayout = (LinearLayout) findViewById(R.id.fullLayout);
+                final Button n = (Button) findViewById(R.id.MenuButton);
+              //  fullLayout.addView(list);
+                LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                list.setLayoutParams(lp1);
+
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+
+                // getWindow().setFlags(WindowManager.LayoutParams., WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+                removed = false;
+            }
+            //list.setVisibility(View.VISIBLE);
+        }
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+        {
+            removed = true;
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+            final LinearLayout list = (LinearLayout)findViewById(R.id.listLine);
+            LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, 0);
+            list.setLayoutParams(lp1);
+            //list.removeAllViews();
+
+
+            LinearLayout layoutVideo = (LinearLayout) findViewById(R.id.layoutVideo); // Jorge
+
+            layout = (LinearLayout.LayoutParams) layoutVideo.getLayoutParams();
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            layoutVideo.setLayoutParams(lp);
+        }
+    }
 
 
 }

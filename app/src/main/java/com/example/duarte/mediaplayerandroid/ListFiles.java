@@ -44,13 +44,14 @@ import java.util.Locale;
 public class ListFiles extends AppCompatActivity {
     private ListView lv;
     private String[] items;
-    private boolean isPlaying = false;
+    private static boolean isPlaying = false;
     private Context context = ListFiles.this;
     private ArrayList adapter = new ArrayList();
     private int img = R.drawable.play; //add
     private int position;
     private EditText editText; // Var lable Search
     private int tabSelected; // tab selected
+    private int auxtabSelected; // tab selected
     ArrayList<String> auxItems =  new ArrayList();
     ArrayList<String> filesALll =  new ArrayList();
     ArrayList<String> filesMusic =  new ArrayList();
@@ -79,9 +80,12 @@ public class ListFiles extends AppCompatActivity {
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
+        tabSelected = 0;
+
         if(bundle != null){
             isPlaying = bundle.getBoolean("isPlaying");
             position = bundle.getInt("position");
+            auxtabSelected = bundle.getInt("tabSelected");
         }
 
         // Create the adapter that will return a fragment for each of the three
@@ -94,7 +98,8 @@ public class ListFiles extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-        tabSelected = 0;
+
+
 
 
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
@@ -129,9 +134,19 @@ public class ListFiles extends AppCompatActivity {
             window.setStatusBarColor(this.getResources().getColor(R.color.Black_F2));
         }
 
+        lv = (ListView) findViewById(R.id.playListLv);
+      /*  if(bundle != null){
+            lv.clearFocus();
+        }*/
         editText = (EditText) findViewById(R.id.txtsearch);// Jorge
         getFiles("all");
+
+
+
+
+
         initSearch();//Jorge
+
 
 
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -139,17 +154,14 @@ public class ListFiles extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
-
-
-
                 if(isPlaying == false){
-                    startActivity(new Intent(getApplicationContext(),MainActivity.class).putExtra("position",searchPosition(position)).putExtra("items",items));
+                    startActivity(new Intent(getApplicationContext(),MainActivity.class).putExtra("position",searchPosition(position)).putExtra("tabSelected",tabSelected).putExtra("items",items));
                     finish();
                 }
                 else
                 {
                     Intent returnMainAct = new Intent();
-                    returnMainAct.putExtra("position",position).putExtra("items",items).putExtra("isPlaying", isPlaying);
+                    returnMainAct.putExtra("position",searchPosition(position)).putExtra("items",items).putExtra("isPlaying", isPlaying);
                     setResult(Activity.RESULT_OK,returnMainAct);
                     finish();
                 }
@@ -316,7 +328,7 @@ public class ListFiles extends AppCompatActivity {
     public  void getFiles(String type){
 
 
-        lv = (ListView) findViewById(R.id.playListLv);
+
 
         ArrayList<File> mySongs = findFiles(getStoragePath(), type);
 
@@ -335,6 +347,9 @@ public class ListFiles extends AppCompatActivity {
             }
 
         }
+
+
+
         setFilesList();
 
       /*  adapter.clear();
@@ -414,6 +429,9 @@ public class ListFiles extends AppCompatActivity {
 
                     // Add this object into the ArrayList myList
                     adapter.add(ld);
+
+
+
                 }
                 }
         }
@@ -457,10 +475,18 @@ public class ListFiles extends AppCompatActivity {
                     ld.setTitle(nameFile);
 
                     auxItems.add(nameFile);
+
                     // Add this object into the ArrayList myList
                     adapter.add(ld);
 
 
+
+        }
+
+        if(isPlaying && (tabSelected == auxtabSelected)){
+
+            playList pl = (playList) adapter.get(position);
+            pl.setImgResId(img);
         }
         lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
 

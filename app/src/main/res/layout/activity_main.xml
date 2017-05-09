@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 
+    android:id="@+id/fullLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+
+    android:background="@color/Black_F2"
     android:orientation="vertical"
-    android:background="#F2000000"
     android:weightSum="1">
 
 
     <LinearLayout
+        android:id="@+id/listLine"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-       >
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/MenuButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_gravity="left"
             android:background="@drawable/menu"
             android:backgroundTint="#ffffff"
@@ -27,8 +29,8 @@
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="List"
             android:layout_gravity="center_vertical"
+            android:text="List"
 
             android:textColor="#ffffff"
 
@@ -46,28 +48,37 @@
     </LinearLayout>
 
 
-    <VideoView
-        android:id="@+id/videoView1"
-        android:layout_width="wrap_content"
-        android:layout_height="295dp" />
+    <LinearLayout
+        android:id="@+id/layoutVideo"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_gravity="center">
+
+        <VideoView
+            android:id="@+id/videoView1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
+    </LinearLayout>
 
 
     <SeekBar
         android:id="@+id/seekbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:progressTint="#ffffff"
         android:backgroundTint="#CC000000"
-    />
+        android:progressTint="#ffffff" />
+
     <TextView
+        android:id="@+id/textViewTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
         android:layout_gravity="right"
-        android:textColor="#ffffff"
+        android:text=""
 
 
-        android:id="@+id/textViewTime" />
+        android:textColor="#ffffff" />
+
     <TextView
         android:id="@+id/musicTitle"
         android:layout_width="wrap_content"
@@ -84,12 +95,11 @@
         android:textColor="@android:color/background_light" />
 
 
-
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
         android:background="#ffffff" />
 
     <RelativeLayout
@@ -123,14 +133,15 @@
             android:id="@+id/prevBt"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:background="@drawable/next2"
-            android:backgroundTint="#ffffff"
-            android:onClick="prevMusic"
-            android:layout_centerHorizontal="true"
-            android:layout_centerInParent="true"
             android:layout_alignBaseline="@+id/playPause"
             android:layout_alignBottom="@+id/playPause"
-            android:layout_toStartOf="@+id/playPause" />
+            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
+            android:layout_toStartOf="@+id/playPause"
+            android:background="@drawable/next2"
+            android:backgroundTint="#ffffff"
+            android:onClick="prevMusic" />
+
     </RelativeLayout>
 
 
@@ -149,12 +160,13 @@
             android:background="@android:drawable/ic_lock_silent_mode"
             android:backgroundTint="#ffffff"
             android:onClick="nextMusic" />
-    <SeekBar
-        android:id="@+id/soundSeekbar"
-        android:layout_width="292dp"
-        android:layout_height="wrap_content"
-        android:progressTint="#ffffff"
-        android:layout_weight="0.88" />
+
+        <SeekBar
+            android:id="@+id/soundSeekbar"
+            android:layout_width="292dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.88"
+            android:progressTint="#ffffff" />
 
         <Button
             android:id="@+id/soundMax"
@@ -162,26 +174,13 @@
             android:layout_height="30dp"
             android:background="@android:drawable/ic_lock_silent_mode_off"
             android:backgroundTint="#ffffff" />
+
+
+
     </LinearLayout>
 
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        />
 
-
-
-    <EditText
-        android:id="@+id/editText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Name"
-      />
 
 
 </LinearLayout>

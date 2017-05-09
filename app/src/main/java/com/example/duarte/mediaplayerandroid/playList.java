@@ -13,6 +13,7 @@ public class playList {
     }
 
     public void setTitle(String MusicTitle) {
+
         this.MusicTitle = MusicTitle;
     }
 
