@@ -47,6 +47,7 @@ import android.widget.VideoView;
 
 import static android.R.attr.action;
 import static android.R.attr.button;
+import static android.R.attr.delay;
 
 
 public class MainActivity extends Activity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
@@ -70,6 +71,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private static boolean removed = false;
     private LinearLayout.LayoutParams  layout;
     private  boolean stateRecorder = true;
+    private boolean auxBtnToOpenMic = false;
 
 
 
@@ -565,6 +567,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQ_CODE_SPEECH_OUTPUT && resultCode == RESULT_OK) {
 
+
             final ArrayList<String> voiceInText = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
           //  recorder.start();
 
@@ -580,12 +583,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
             executeCommand(voiceInText);
 
-           // playMusic(null);
 
-            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            recorder.setOutputFile("/dev/null");
+
+
 
             try {
                 recorder.prepare();
@@ -598,6 +598,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             verifyNoiseThread();
             changeVolumeWithNoise();
 
+            auxBtnToOpenMic = false;
             stateRecorder = true;
 
 
@@ -614,10 +615,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
             checkState(null);
 
-            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            recorder.setOutputFile("/dev/null");
+
 
             try {
                 recorder.prepare();
@@ -629,7 +627,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             }
 
 
-
+            auxBtnToOpenMic = false;
             stateRecorder = false;
 
         }
@@ -771,13 +769,15 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
 
         if(event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) {
-            if(event.getPointerCount() > 2) {
-                btnToOpenMic();
-            }else
-            if(event.getPointerCount() == 2)
+            if(event.getPointerCount() == 2 && auxBtnToOpenMic == false)
             {
                 checkState(null);
             }
+            else
+            if(event.getPointerCount() > 2) {
+                btnToOpenMic();
+            }
+
 
 
         }
@@ -844,15 +844,16 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
 
     private void btnToOpenMic() {
+        auxBtnToOpenMic = true;
+        if(stateRecorder) {
+            recorder.stop();
+        }
+
         if(isPlaying){
             checkState(null);
         }
 
-        if(stateRecorder) {
-            recorder.stop();
 
-
-        }
 
 
 
@@ -910,32 +911,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
     }
 
- /*   public  void search(String text){
-
-        int size = items.length;
-        for(int i = 0; i<size; i++){
-
-            if(items[i].contains(text)) {
-                items[i] = mySongs.get(i).getName().toString();
-            }
-        }
-
-        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
-        adapter.clear();
-        getDataInList();
-
-    }*/
-
-   /* @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_CODE_SPEECH_OUTPUT && resultCode == RESULT_OK) {
-            ArrayList<String> voiceInText = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            showVoiceText.setText(voiceInText.get(0));
-            btnToOpenMic();
-        }
-
-    }*/
 
    @Override
     public void onConfigurationChanged(Configuration newConfig) {
