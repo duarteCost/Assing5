@@ -51,7 +51,7 @@
     <LinearLayout
         android:id="@+id/layoutVideo"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="305dp"
         android:layout_gravity="center">
 
         <VideoView
@@ -131,8 +131,8 @@
 
         <Button
             android:id="@+id/prevBt"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:layout_alignBaseline="@+id/playPause"
             android:layout_alignBottom="@+id/playPause"
             android:layout_centerHorizontal="true"
@@ -154,8 +154,8 @@
         <Button
             android:id="@+id/soundMin"
             style="?android:attr/buttonStyleSmall"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
 
             android:background="@android:drawable/ic_lock_silent_mode"
             android:backgroundTint="#ffffff"
@@ -170,8 +170,8 @@
 
         <Button
             android:id="@+id/soundMax"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:background="@android:drawable/ic_lock_silent_mode_off"
             android:backgroundTint="#ffffff" />
 
