@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
@@ -165,6 +166,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        int orientation=this.getResources().getConfiguration().orientation;
+        if(orientation==Configuration.ORIENTATION_LANDSCAPE){
+            ORIENTATION_LANDSCAPE();
         }
     }
 
@@ -634,6 +640,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             stateRecorder = false;
 
         }
+
     }//onActivityResult
 
 
@@ -915,57 +922,63 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
 
-   @Override
+
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
         {
-
-           LinearLayout layoutVideo = (LinearLayout) findViewById(R.id.layoutVideo); // Jorge
-
-            //LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1000);
-
-            layoutVideo.setLayoutParams(layout);
-
-            if(removed) {
-                final LinearLayout list = (LinearLayout) findViewById(R.id.listLine);
-                final LinearLayout fullLayout = (LinearLayout) findViewById(R.id.fullLayout);
-                final Button n = (Button) findViewById(R.id.MenuButton);
-              //  fullLayout.addView(list);
-                LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                list.setLayoutParams(lp1);
-
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-
-                // getWindow().setFlags(WindowManager.LayoutParams., WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-                removed = false;
-            }
-            //list.setVisibility(View.VISIBLE);
+            ORIENTATION_PORTRAIT();
         }
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
         {
-            removed = true;
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-            final LinearLayout list = (LinearLayout)findViewById(R.id.listLine);
-            LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, 0);
-            list.setLayoutParams(lp1);
-            //list.removeAllViews();
-
-
-            LinearLayout layoutVideo = (LinearLayout) findViewById(R.id.layoutVideo); // Jorge
-
-            layout = (LinearLayout.LayoutParams) layoutVideo.getLayoutParams();
-
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-            layoutVideo.setLayoutParams(lp);
+            ORIENTATION_LANDSCAPE();
         }
     }
 
+public void ORIENTATION_PORTRAIT(){
+    LinearLayout layoutVideo = (LinearLayout) findViewById(R.id.layoutVideo); // Jorge
+
+    layoutVideo.setLayoutParams(layout);
+
+    if(removed) {
+        final LinearLayout list = (LinearLayout) findViewById(R.id.listLine);
+        final LinearLayout fullLayout = (LinearLayout) findViewById(R.id.fullLayout);
+        final Button n = (Button) findViewById(R.id.MenuButton);
+
+        LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        list.setLayoutParams(lp1);
+
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+
+
+
+        removed = false;
+    }
+
+}
+
+    public void ORIENTATION_LANDSCAPE(){
+
+        removed = true;
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        final LinearLayout list = (LinearLayout)findViewById(R.id.listLine);
+        LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, 0);
+        list.setLayoutParams(lp1);
+        //list.removeAllViews();
+        final VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1); // Jorge
+        //mVideoView2.getForegroundGravity(ce)
+        LinearLayout layoutVideo = (LinearLayout) findViewById(R.id.layoutVideo); // Jorge
+      //  layoutVideo.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        layout = (LinearLayout.LayoutParams) layoutVideo.getLayoutParams();
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        layoutVideo.setLayoutParams(lp);
+
+    }
 
 }
 
