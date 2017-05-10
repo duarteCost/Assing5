@@ -361,6 +361,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         Intent returnListAct = new Intent(this, ListFiles.class);
         returnListAct.putExtra("isPlaying", isPlaying).putExtra("tabSelected",tabSelected).putExtra("position", position);
         startActivityForResult(returnListAct, 1);
+        //btnToOpenMic();
 
 
 
@@ -555,6 +556,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             if(resultCode == Activity.RESULT_OK){
                 isPlaying=data.getBooleanExtra("isPlaying",isPlaying);
                 items = data.getStringArrayExtra("items");
+                tabSelected = data.getIntExtra("tabSelected", tabSelected);
+
                 maxPosition = items.length;
                 position = data.getIntExtra("position", position);
                 if(isPlaying){

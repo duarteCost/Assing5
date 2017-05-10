@@ -34,11 +34,13 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 
 public class ListFiles extends AppCompatActivity {
@@ -99,6 +101,8 @@ public class ListFiles extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
+       tabLayout.getTabAt(auxtabSelected).select();
+       
 
 
 
@@ -161,7 +165,7 @@ public class ListFiles extends AppCompatActivity {
                 else
                 {
                     Intent returnMainAct = new Intent();
-                    returnMainAct.putExtra("position",searchPosition(position)).putExtra("items",items).putExtra("isPlaying", isPlaying);
+                    returnMainAct.putExtra("position",searchPosition(position)).putExtra("items",items).putExtra("tabSelected",tabSelected).putExtra("isPlaying", isPlaying);
                     setResult(Activity.RESULT_OK,returnMainAct);
                     finish();
                 }
@@ -196,6 +200,8 @@ public class ListFiles extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    
 
     /**
      * A placeholder fragment containing a simple view.
@@ -419,26 +425,27 @@ public class ListFiles extends AppCompatActivity {
 
         }
 
-        for (String param : params) {
+        for (String param : params){
 
-            for (String nameFile: namesFiles) {
-                if (nameFile.contains(param)) {
-                    playList ld = new playList();
-                    ld.setTitle(nameFile);
-                    auxItems.add(nameFile);
+                for (String nameFile : namesFiles) {
+                    String nameFile2 = nameFile.toLowerCase();
+                    if (nameFile2.contains(param.toLowerCase())) {
+                        playList ld = new playList();
+                        ld.setTitle(nameFile);
+                        auxItems.add(nameFile);
 
-                    // Add this object into the ArrayList myList
-                    adapter.add(ld);
+                        // Add this object into the ArrayList myList
+                        adapter.add(ld);
 
 
-
+                    }
                 }
-                }
-        }
+            }
 
         lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
 
     }
+
 
 
     public void setFilesList(){
@@ -502,29 +509,7 @@ public class ListFiles extends AppCompatActivity {
         return 0;
     }
 
-    private void btnToOpenMic() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Change your music");
 
-        try {
-            startActivityForResult(intent, REQ_CODE_SPEECH_OUTPUT);
-        } catch (ActivityNotFoundException tim) {
-
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_CODE_SPEECH_OUTPUT && resultCode == RESULT_OK) {
-            ArrayList<String> voiceInText = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            showVoiceText.setText(voiceInText.get(0));
-            btnToOpenMic();
-        }
-
-    }
 
 }
 
