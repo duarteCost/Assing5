@@ -602,7 +602,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             stateRecorder = true;
 
 
-        }else {
+        }else if(auxBtnToOpenMic){
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
