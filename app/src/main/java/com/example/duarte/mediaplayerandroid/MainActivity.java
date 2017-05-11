@@ -67,35 +67,29 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private double amplitudeDb;
     private SeekBar volumeSeekbar = null;
     private AudioManager audioManager = null;
-    private SeekBar seekBar; // Jorge
-    private final int  REQ_CODE_SPEECH_OUTPUT = 0; //Jorge
+    private SeekBar seekBar; // seekBar time
+    private final int  REQ_CODE_SPEECH_OUTPUT = 0; //SPEECH OUTPUT
     private static boolean removed = false;
     private LinearLayout.LayoutParams  layout;
-    private  boolean stateRecorder = true;
-    private boolean auxBtnToOpenMic = false;
+    private  boolean stateRecorder = true; // state recorder
+    private boolean auxBtnToOpenMic = false; // state SPEECH
 
 
-
-    Button clk;// Jorge
-    VideoView videov;// Jorge
-
-    private int GLOBAL_TOUCH_POSITION_X = 0;// Jorge
-    private int GLOBAL_TOUCH_CURRENT_POSITION_X = 0;// Jorge
-    private VideoView mVideoView2;  // Jorge
-    private boolean videoPlay;
+    private VideoView mVideoView2;  // video
+    private boolean videoPlay; // video state
 
     private volatile Thread setVolume;
 
 
-    private float x1,x2;
-    private static final int MIN_DISTANCE = 500;
+    private float x1,x2; // aux gestures
+    private static final int MIN_DISTANCE = 500; //swipe DISTANCE
 
     private Button playPause;
     private int position;
     private int countT = 0;
     private String[] items;
     private double amplitudeDbC = 0;
-    private int tabSelected;
+    private int tabSelected; // tab Selected on tableview
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -111,28 +105,21 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         tabSelected = bundle.getInt("tabSelected");
         maxPosition = items.length;
 
-        //Jorge
-
-      /*  Intent intent2 = new Intent( getApplicationContext(), ServicePlayer.class );
-        intent.setAction( ServicePlayer.ACTION_PLAY );
-        startService( intent2 );*/
-
-
-
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         setVolume();
 
-        mVideoView2 = (VideoView) findViewById(R.id.videoView1); // Jorge
-        if (android.os.Build.VERSION.SDK_INT >= 21) { // Jorge
+        mVideoView2 = (VideoView) findViewById(R.id.videoView1); // get layout video
+        if (android.os.Build.VERSION.SDK_INT >= 21) { // change color bar
             Window window = this.getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor(this.getResources().getColor(R.color.Black_F2));
         }
-        textViewTime = (TextView) findViewById(R.id.textViewTime); initializeViews();  // Jorge
-        handleSeekbar(); // Jorge
-        seekBar.setMax((int) 20 / 1000); // Jorge
+
+        textViewTime = (TextView) findViewById(R.id.textViewTime); initializeViews();  // initialize functions
+        handleSeekbar(); // initialize time Seekbar
+        seekBar.setMax((int) 20 / 1000); // initialize length Seekbar
 
         if(savedInstanceState != null){
             if(savedInstanceState != null){
@@ -168,9 +155,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             e.printStackTrace();
         }
 
-        int orientation=this.getResources().getConfiguration().orientation;
-        if(orientation==Configuration.ORIENTATION_LANDSCAPE){
-            ORIENTATION_LANDSCAPE();
+        int orientation=this.getResources().getConfiguration().orientation; // save orientation
+        if(orientation==Configuration.ORIENTATION_LANDSCAPE){ // if orientation horizontal
+            ORIENTATION_LANDSCAPE(); // change layout
         }
     }
 
@@ -573,13 +560,17 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             }
         }
 
+
+        //////////////////////////
+        // Case btnToOpenMic()  //
+        //////////////////////////
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_CODE_SPEECH_OUTPUT && resultCode == RESULT_OK) {
+        if (requestCode == REQ_CODE_SPEECH_OUTPUT && resultCode == RESULT_OK) { // result of speech ok
 
-
+            // array potential speech
             final ArrayList<String> voiceInText = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-          //  recorder.start();
 
+            // message command
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -590,12 +581,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 }
             });
 
-            executeCommand(voiceInText);
+            executeCommand(voiceInText); // verify word command
 
-
-
-
-
+            // init recorder
             try {
                 recorder.prepare();
                 recorder.start();
@@ -607,11 +595,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             verifyNoiseThread();
             changeVolumeWithNoise();
 
+            // chnage states
             auxBtnToOpenMic = false;
             stateRecorder = true;
 
 
-        }else if(auxBtnToOpenMic){
+        }else if(auxBtnToOpenMic){ // didn't you get the speech result
+
+            // error message
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -622,10 +613,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 }
             });
 
-            checkState(null);
+            checkState(null); // play media player
 
 
-
+            // init recorder
             try {
                 recorder.prepare();
                 recorder.start();
@@ -635,7 +626,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 e.printStackTrace();
             }
 
-
+            // chnage states
             auxBtnToOpenMic = false;
             stateRecorder = false;
 
@@ -644,16 +635,22 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }//onActivityResult
 
 
-    // Jorge
+
+
+    ///////////////////////////////////
+    //                               //
+    //     Function btnToOpenMic()   //
+    //   change state seekbar time   //
+    ///////////////////////////////////
     private void handleSeekbar(){
       seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
            @Override
            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-               if (player != null && fromUser) {
+               if (player != null && fromUser) { // if music
                    player.seekTo(progress * 1000);
 
                }
-              if (videoPlay && fromUser){
+              if (videoPlay && fromUser){ // if video
                   VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
                   mVideoView2.seekTo(progress * 1000);
 
@@ -675,25 +672,34 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         });
     }
 
+
+    //////////////////////////////////////
+    //                                  //
+    //     Function initializeViews()   //
+    //      start functions view        //
+    //////////////////////////////////////
+
     private void initializeViews(){
 
         seekBar = (SeekBar) findViewById(R.id.seekbar);
-
-
         getWindow().setFormat(PixelFormat.UNKNOWN);
-        //displays a video file
-
 
     }
 
+
+    //////////////////////////////////
+    //                              //
+    //     Function videoPlay()     //
+    //    play video or animation   //
+    //////////////////////////////////
     public void videoPlay ()
     {
 
 
-        File sdCard = getStoragePath();
-        final File file = new File(sdCard,items[position]);
+        File sdCard = getStoragePath(); // get path sd card
+        final File file = new File(sdCard,items[position]); // get file sd card
         getWindow().setFormat(PixelFormat.UNKNOWN);
-        final VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1); // Jorge
+        final VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1); // get VideoView the layout
 
 
         mVideoView2.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -708,63 +714,65 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         });
 
 
-        String uriPath = file.getAbsolutePath().toString();
+        String uriPath = file.getAbsolutePath().toString(); // string extension
 
-         if(uriPath.endsWith(".mp4") ) {
-             videoPlay = true;
-             player.setVolume(0,0); // Player mute
+         if(uriPath.endsWith(".mp4") ) {    // if video
+             videoPlay = true;              // change status
+             player.setVolume(0,0);         // Player mute
             Uri uri2 = Uri.parse(uriPath);
             mVideoView2.setVideoURI(uri2);
             mVideoView2.requestFocus();
-            mVideoView2.start();
-          //  player.stop();
-        } else
+            mVideoView2.start();            // start video
+             mVideoView2.seekTo(player.getCurrentPosition()); // set video position player
+
+        } else // if animation
             {
 
-                player.setVolume(100, 100); // Player not mute
+                player.setVolume(100, 100);     // Player not mute
 
-                videoPlay = false;
-                String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphycd;
-//giphyCD.3gp"
-                // Disc_Tunnel_4K_Motion_Background_Loop-3.3gp
-               // String uriPathCD = getStoragePath()+"/giphyCD.3gp";
+                videoPlay = false;              // change status
+                String uriPathCD = "android.resource://"+ getPackageName() + "/"+R.raw.giphycd; // path animation
                 Uri uri = Uri.parse(uriPathCD);
                 mVideoView2.setVideoURI(uri);
                 mVideoView2.requestFocus();
-                mVideoView2.start();
-
-
-
+                mVideoView2.start();           // start animation
 
             }
         }
 
 
-
+    //////////////////////////////////
+    //                              //
+    //     Function videoStop()     //
+    //          stop video          //
+    //////////////////////////////////
     public void videoStop ()
     {
-        File sdCard = getStoragePath();
-        final File file = new File(sdCard,items[position]);
+        File sdCard = getStoragePath(); // get path sd card
+        final File file = new File(sdCard,items[position]); // get file sd card
 
-        VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
-        String uriPath = file.getAbsolutePath().toString();
+        VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);// get VideoView the layout
+        String uriPath = file.getAbsolutePath().toString();// string extension
 
 
-        if(uriPath.endsWith(".mp4")) {
-
+        if(uriPath.endsWith(".mp4")) { // if video
             Uri uri2 = Uri.parse(uriPath);
             mVideoView2.setVideoURI(uri2);
             mVideoView2.requestFocus();
-            mVideoView2.stopPlayback();
+            mVideoView2.stopPlayback();// stop video
         }
     }
 
 
-
+    //////////////////////////////////
+    //                              //
+    //     Function videoPause()    //
+    //    pause video or animation  //
+    //////////////////////////////////
     public void videoPause ()
     {
-        VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);
-        mVideoView2.pause();
+        VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1);// get VideoView the layout
+        mVideoView2.pause();// pause video
 
     }
 
@@ -772,27 +780,28 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
 
 
-
-
+    //////////////////////////////////
+    //                              //
+    //     Function onTouchEvent()  //
+    //             gestures         //
+    //////////////////////////////////
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
 
-        if(event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) {
-            if(event.getPointerCount() == 2 && auxBtnToOpenMic == false)
+        if(event.getActionMasked() == MotionEvent.ACTION_POINTER_UP) { // if touch
+            if(event.getPointerCount() == 2 && auxBtnToOpenMic == false) // touch with two fingers I can do play or pause
             {
-                checkState(null);
+                checkState(null); // chnage state palyer
             }
             else
-            if(event.getPointerCount() > 2) {
-                btnToOpenMic();
+            if(event.getPointerCount() > 2) { // When I touch with more than two fingers it starts the speech/voice recognizer
+                btnToOpenMic(); // call speech/voice recognizer
             }
-
-
 
         }
 
-        if(event.getPointerCount() == 1) {
+        if(event.getPointerCount() == 1) { // touch with one finger
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     x1 = event.getX();
@@ -800,13 +809,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                 case MotionEvent.ACTION_UP:
                     x2 = event.getX();
                     float deltaX = x2 - x1;
-                    if (Math.abs(deltaX) > MIN_DISTANCE) {
+                    if (Math.abs(deltaX) > MIN_DISTANCE) { // if swipe
 
-                        if (deltaX < 0) {
+                        if (deltaX < 0) { // swipe left to right it goes to the next song or video
                             nextMusic(null);
                             return true;
                         }
-                        if (deltaX > 0) {
+                        if (deltaX > 0) { // swipe right to left it goes to the previous song or video
                             prevMusic(null);
                             return true;
                         }
@@ -820,8 +829,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         return super.onTouchEvent(event);
 
     }
-// Jorge
 
+
+    //////////////////////////////////
+    //                              //
+    //   Function getStoragePath()  //
+    //   get psth sd card lg g3     //
+    //////////////////////////////////
     public File getStoragePath() {
         String removableStoragePath;
         File fileList[] = new File("/storage/").listFiles();
@@ -835,15 +849,16 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
 
 
-
-
+    /////////////////////////////////////
+    //                                 //
+    //       Function onKeyDown()      //
+    //   on click bottun headphones    //
+    /////////////////////////////////////
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_HEADSETHOOK){
-            //handle click
-           // btnToOpenMic();
+        if(keyCode == KeyEvent.KEYCODE_HEADSETHOOK){ // if click bottun headphones
 
-            btnToOpenMic();
+            btnToOpenMic(); // call speech/voice recognizer
 
 
             return true;
@@ -852,28 +867,30 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
 
-
+    ////////////////////////////////////////
+    //                                    //
+    //       Function btnToOpenMic()      //
+    //       speech/voice recognizer      //
+    ////////////////////////////////////////
     private void btnToOpenMic() {
-        auxBtnToOpenMic = true;
+        auxBtnToOpenMic = true; // change state
+
         if(stateRecorder) {
-            recorder.stop();
+            recorder.stop(); // stop recorder
         }
 
-        if(isPlaying){
-            checkState(null);
+        if(isPlaying){ // if play goes to stop
+            checkState(null); // stop player
         }
-
-
-
 
 
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH);
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Change your music");
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH); // LANGUAGE
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Change your music or video"); // mensage
 
         try {
-            startActivityForResult(intent, REQ_CODE_SPEECH_OUTPUT);
+            startActivityForResult(intent, REQ_CODE_SPEECH_OUTPUT); // REQ_CODE_SPEECH_OUTPUT
         } catch (ActivityNotFoundException tim) {
 
 
@@ -882,16 +899,21 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     }
 
 
+    ////////////////////////////////////////
+    //                                    //
+    //       Function executeCommand()    //
+    //       search the words command     //
+    ////////////////////////////////////////
     public void executeCommand(ArrayList<String> voiceInText){
 
-        if(voiceInText.get(0).contains("next")){
-            nextMusic(null);
-        }else if(voiceInText.get(0).contains("prev")){
-            prevMusic(null);
-        }else if(voiceInText.get(0).contains("play")){
-            search(voiceInText.get(0));
-        }else if(voiceInText.get(0).contains("stop")){
-            checkState(null);
+        if(voiceInText.get(0).contains("next")){ // if word is "next"
+            nextMusic(null); // next
+        }else if(voiceInText.get(0).contains("prev")){// if word is "prev"
+            prevMusic(null); // prev
+        }else if(voiceInText.get(0).contains("play")){ // if word is "play"
+            search(voiceInText.get(0)); // search file name
+        }else if(voiceInText.get(0).contains("stop")){ // if word is "stop"
+            checkState(null); // stop
         }else {
             if(isPlaying){
                 checkState(null);
@@ -900,44 +922,63 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
     }
 
+
+    ///////////////////////////////
+    //                           //
+    //      Function search()    //
+    //      search file name     //
+    ///////////////////////////////
     public  void search(String text) {
 
-        text = text.substring(5, text.length());
-        ArrayList<String> mySongs2 = new ArrayList();
-        int filePosition = 0;
+        text = text.substring(5, text.length()); // substring name file
+        ArrayList<String> mySongs2 = new ArrayList(); // creat array
+        int filePosition = 0;     // creat position
+        text = text.toLowerCase(); // text toLowerCase
 
         for (int i = 0; i < items.length; i++) {
+            String name = items[i].toLowerCase(); // name toLowerCase
 
-            if (items[i].contains(text)) {
-                mySongs2.add(items[i]);
-                filePosition=i;
+            if (name.contains(text)) { // if contains
+                mySongs2.add(items[i]); // add array
+                filePosition=i; // set position
             }
         }
 
-        if(mySongs2.size()==1){
-            position = filePosition;
-            stopMusic(null);
-            playMusic(null);
+        if(mySongs2.size()==1){ // If the array has only one element
+            position = filePosition; // set position
+            stopMusic(null); // stop
+            playMusic(null); // play file name
         }
     }
 
 
 
+    ///////////////////////////////////////////////
+    //                                           //
+    //      Function onConfigurationChanged()    //
+    //           ORIENTATION change              //
+    ///////////////////////////////////////////////
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) // if vertical
         {
             ORIENTATION_PORTRAIT();
         }
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) // if horizontal
         {
             ORIENTATION_LANDSCAPE();
         }
     }
 
-public void ORIENTATION_PORTRAIT(){
-    LinearLayout layoutVideo = (LinearLayout) findViewById(R.id.layoutVideo); // Jorge
+
+    ///////////////////////////////////////////////
+    //                                           //
+    //      Function ORIENTATION_PORTRAIT()      //
+    //           ORIENTATION vertical            //
+    ///////////////////////////////////////////////
+public void ORIENTATION_PORTRAIT(){ // Adds buttons and NOT FULLSCREEN
+    LinearLayout layoutVideo = (LinearLayout) findViewById(R.id.layoutVideo);
 
     layoutVideo.setLayoutParams(layout);
 
@@ -959,7 +1000,12 @@ public void ORIENTATION_PORTRAIT(){
 
 }
 
-    public void ORIENTATION_LANDSCAPE(){
+    ///////////////////////////////////////////////
+    //                                           //
+    //      Function ORIENTATION_LANDSCAPE()     //
+    //           ORIENTATION horizontal          //
+    ///////////////////////////////////////////////
+    public void ORIENTATION_LANDSCAPE(){// remove buttons and  FULLSCREEN
 
         removed = true;
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
@@ -968,11 +1014,9 @@ public void ORIENTATION_PORTRAIT(){
         final LinearLayout list = (LinearLayout)findViewById(R.id.listLine);
         LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, 0);
         list.setLayoutParams(lp1);
-        //list.removeAllViews();
-        final VideoView mVideoView2 = (VideoView) findViewById(R.id.videoView1); // Jorge
-        //mVideoView2.getForegroundGravity(ce)
-        LinearLayout layoutVideo = (LinearLayout) findViewById(R.id.layoutVideo); // Jorge
-      //  layoutVideo.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+
+        LinearLayout layoutVideo = (LinearLayout) findViewById(R.id.layoutVideo);
+
         layout = (LinearLayout.LayoutParams) layoutVideo.getLayoutParams();
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);

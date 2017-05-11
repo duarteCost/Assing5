@@ -44,22 +44,22 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class ListFiles extends AppCompatActivity {
-    private ListView lv;
-    private String[] items;
-    private static boolean isPlaying = false;
-    private Context context = ListFiles.this;
-    private ArrayList adapter = new ArrayList();
+    private ListView lv; // list view
+    private String[] items; // array files player
+    private static boolean isPlaying = false; // satate player
+    private Context context = ListFiles.this; // context
+    private ArrayList adapter = new ArrayList(); // adaptar
     private int img = R.drawable.play; //add
-    private int position;
+    private int position; // position row clicked
     private EditText editText; // Var lable Search
     private int tabSelected; // tab selected
-    private int auxtabSelected; // tab selected
-    ArrayList<String> auxItems =  new ArrayList();
-    ArrayList<String> filesALll =  new ArrayList();
-    ArrayList<String> filesMusic =  new ArrayList();
-    ArrayList<String> filesVideo =  new ArrayList();
-    private TextView showVoiceText;
-    private final int REQ_CODE_SPEECH_OUTPUT = 0;
+    private int auxtabSelected; // tab selected main activity
+    ArrayList<String> auxItems =  new ArrayList(); // array aux
+    ArrayList<String> filesALll =  new ArrayList(); // array all files
+    ArrayList<String> filesMusic =  new ArrayList(); // array mucics
+    ArrayList<String> filesVideo =  new ArrayList(); // array video
+
+
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -81,10 +81,10 @@ public class ListFiles extends AppCompatActivity {
         setContentView(R.layout.activity_list_files);
 
         Intent intent = getIntent();
-        Bundle bundle = intent.getExtras();
-        tabSelected = 0;
+        Bundle bundle = intent.getExtras(); // get variables main activity
+        tabSelected = 0; // tab selected 0
 
-        if(bundle != null){
+        if(bundle != null){ // If any variables variables main activity
             isPlaying = bundle.getBoolean("isPlaying");
             position = bundle.getInt("position");
             auxtabSelected = bundle.getInt("tabSelected");
@@ -101,29 +101,29 @@ public class ListFiles extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-       tabLayout.getTabAt(auxtabSelected).select();
+       tabLayout.getTabAt(auxtabSelected).select(); // change tab selected
        
 
 
-
+        // if change tab
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                     @Override
                     public void onPageSelected(int tab) {
                      switch (tab) {
                             case 0:
-                                tabSelected = 0;
+                                tabSelected = 0; // change variable
                                 setFilesList();
-                                //search(tabSelected, "mp3","mp4");
+
                                 break;
                             case 1:
-                                tabSelected = 1;
+                                tabSelected = 1; // change variable
                                 setFilesList();
-                                //search(tabSelected, "mp3");
+
                                 break;
                             case 2:
-                                tabSelected = 2;
+                                tabSelected = 2; // change variable
                                 setFilesList();
-                                //search(tabSelected, "mp4");
+
                                 break;
                         }
 
@@ -131,40 +131,36 @@ public class ListFiles extends AppCompatActivity {
                 });
 
 
-        if (android.os.Build.VERSION.SDK_INT >= 21) { // Jorge
+        if (android.os.Build.VERSION.SDK_INT >= 21) { // change color bar
             Window window = this.getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor(this.getResources().getColor(R.color.Black_F2));
         }
 
-        lv = (ListView) findViewById(R.id.playListLv);
-      /*  if(bundle != null){
-            lv.clearFocus();
-        }*/
-        editText = (EditText) findViewById(R.id.txtsearch);// Jorge
-        getFiles("all");
+        lv = (ListView) findViewById(R.id.playListLv); // get layout list view
+
+        editText = (EditText) findViewById(R.id.txtsearch);// get text search label
+        getFiles("all"); // get files sd
+
+        initSearch();// start Search
 
 
-
-
-
-        initSearch();//Jorge
-
-
-
+        // On Item Click Listener
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
-                if(isPlaying == false){
+                if(isPlaying == false){ // if play
+                    // send variables
                     startActivity(new Intent(getApplicationContext(),MainActivity.class).putExtra("position",searchPosition(position)).putExtra("tabSelected",tabSelected).putExtra("items",items));
                     finish();
                 }
-                else
+                else // if not play
                 {
                     Intent returnMainAct = new Intent();
+                    // send variables
                     returnMainAct.putExtra("position",searchPosition(position)).putExtra("items",items).putExtra("tabSelected",tabSelected).putExtra("isPlaying", isPlaying);
                     setResult(Activity.RESULT_OK,returnMainAct);
                     finish();
@@ -234,21 +230,6 @@ public class ListFiles extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_list_files, container, false);
             TextView textView = (TextView) rootView.findViewById(R.id.section_label);
 
-
-            switch (getArguments().getInt(ARG_SECTION_NUMBER)) {
-                case 0:
-
-                    break;
-                case 1:
-
-                    break;
-                case 2:
-                    break;
-            }
-
-            //textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-
-
             return rootView;
         }
     }
@@ -297,16 +278,20 @@ public class ListFiles extends AppCompatActivity {
 
 
 
-
+    ///////////////////////////
+    //                       //
+    // Function findFiles()  //
+    //      find files sd    //
+    ///////////////////////////
     public ArrayList<File> findFiles(File root, String type){
         ArrayList<File> al = new ArrayList<File>();
         File[] files = root.listFiles();
         for(File singleFile : files){
             if(singleFile.isDirectory()&&!singleFile.isHidden()){
                 findFiles(singleFile , type);
-            }
+            }// if music or video
             else if((singleFile.getName().endsWith(".mp3") || singleFile.getName().endsWith(".wmv") || singleFile.getName().endsWith(".mp4") || singleFile.getName().endsWith(".mov"))&& !singleFile.getName().contains("._")  ){
-                    al.add(singleFile);
+                    al.add(singleFile); // Adds the file array
 
 
 
@@ -318,7 +303,11 @@ public class ListFiles extends AppCompatActivity {
 
 
 
-
+    //////////////////////////////////
+    //                              //
+    //   Function getStoragePath()  //
+    //   get psth sd card lg g3     //
+    //////////////////////////////////
    public File getStoragePath() {
         String removableStoragePath;
         File fileList[] = new File("/storage/").listFiles();
@@ -331,40 +320,45 @@ public class ListFiles extends AppCompatActivity {
     }
 
 
+    //////////////////////////////////
+    //                              //
+    //       Function getFiles()    //
+    //      separating the files    //
+    //////////////////////////////////
     public  void getFiles(String type){
 
 
-
-
-        ArrayList<File> mySongs = findFiles(getStoragePath(), type);
+        ArrayList<File> mySongs = findFiles(getStoragePath(), type); // get files sd
 
        items = new String[mySongs.size()];
         for(int i = 0; i<mySongs.size(); i++){
 
-            if(mySongs.get(i).getName().contains(".mp3") || mySongs.get(i).getName().contains(".mp4")){
-                filesALll.add(mySongs.get(i).getName().toString());
+            if(mySongs.get(i).getName().contains(".mp3") || mySongs.get(i).getName().contains(".mp4")){ // if file is all
+                filesALll.add(mySongs.get(i).getName().toString()); // add array all
 
             }
-            if(mySongs.get(i).getName().contains(".mp3") ){
-                filesMusic.add(mySongs.get(i).getName().toString());
+            if(mySongs.get(i).getName().contains(".mp3") ){ // if file is music
+                filesMusic.add(mySongs.get(i).getName().toString()); // add array music
             }
-            if(mySongs.get(i).getName().contains(".mp4") ){
-                filesVideo.add(mySongs.get(i).getName().toString());
+            if(mySongs.get(i).getName().contains(".mp4") ){ // if file is video
+                filesVideo.add(mySongs.get(i).getName().toString());// add array video
             }
 
         }
 
 
 
-        setFilesList();
-
-      /*  adapter.clear();
-        search(0, "mp3","mp4","wmv");
-        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add*/
+        setFilesList(); // set files list view
 
 
     }
 
+
+    ////////////////////////////////////
+    //                                //
+    //       Function initSearch()    //
+    //      on changed label search   //
+    ////////////////////////////////////
     public void initSearch()
     {
 
@@ -373,9 +367,9 @@ public class ListFiles extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable arg0) {
                 // TODO Auto-generated method stub
-                String text = editText.getText().toString().toLowerCase(Locale.getDefault());
+                String text = editText.getText().toString().toLowerCase(Locale.getDefault()); // get text
 
-                search(text);
+                search(text); // search text
 
                 editText.setImeActionLabel("Custom text", KeyEvent.KEYCODE_ENTER);
             }
@@ -402,17 +396,20 @@ public class ListFiles extends AppCompatActivity {
 
 
 
-
+    ////////////////////////////////////
+    //                                //
+    //       Function initSearch()    //
+    //      on changed label search   //
+    ////////////////////////////////////
     public  void search(String... params){
 
-        ArrayList<String> namesFiles =  new ArrayList();
+        ArrayList<String> namesFiles =  new ArrayList(); // create array file names
 
-        auxItems.clear();
-        //listVewItems.clear();
-        lv.clearFocus();
-        adapter.clear();
+        auxItems.clear(); // clear array aux
+        lv.clearFocus(); // clear list view
+        adapter.clear(); // clear adapter
 
-        switch (tabSelected){
+        switch (tabSelected){ // select array
             case 0:
                 namesFiles = filesALll;
                 break;
@@ -425,14 +422,15 @@ public class ListFiles extends AppCompatActivity {
 
         }
 
-        for (String param : params){
+        for (String param : params){ // for params
 
-                for (String nameFile : namesFiles) {
-                    String nameFile2 = nameFile.toLowerCase();
-                    if (nameFile2.contains(param.toLowerCase())) {
-                        playList ld = new playList();
-                        ld.setTitle(nameFile);
-                        auxItems.add(nameFile);
+                for (String nameFile : namesFiles) { // for names
+                    String nameFile2 = nameFile.toLowerCase(); // name toLowerCase
+
+                    if (nameFile2.contains(param.toLowerCase())) { // if contains
+                        playList ld = new playList(); // creat new playlist
+                        ld.setTitle(nameFile); // add name
+                        auxItems.add(nameFile); // Adds the name in the array aux
 
                         // Add this object into the ArrayList myList
                         adapter.add(ld);
@@ -442,20 +440,24 @@ public class ListFiles extends AppCompatActivity {
                 }
             }
 
-        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
+        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add names list view
 
     }
 
 
-
+    ////////////////////////////////////
+    //                                //
+    //       Function setFilesList()  //
+    //        set files list view     //
+    ////////////////////////////////////
     public void setFilesList(){
-        lv.clearFocus();
-        adapter.clear();
-        auxItems.clear();
+        lv.clearFocus();// clear list view
+        adapter.clear();// clear adapter
+        auxItems.clear();// clear array aux
 
-        ArrayList<String> namesFiles =  new ArrayList();
+        ArrayList<String> namesFiles =  new ArrayList(); // create array file names
 
-        switch (tabSelected){
+        switch (tabSelected){// select array
             case 0:
                 namesFiles = filesALll;
                 break;
@@ -468,20 +470,19 @@ public class ListFiles extends AppCompatActivity {
 
         }
 
-        items = new String[namesFiles.size()];
+        items = new String[namesFiles.size()]; // create an array of items
         for(int i = 0; i<namesFiles.size(); i++){
 
-            items[i] = namesFiles.get(i);
+            items[i] = namesFiles.get(i); // add names
         }
 
 
-        for (String nameFile : namesFiles) {
+        for (String nameFile : namesFiles) { // for names
 
+                    playList ld = new playList(); // creat new playlist
+                    ld.setTitle(nameFile);// add name
 
-                    playList ld = new playList();
-                    ld.setTitle(nameFile);
-
-                    auxItems.add(nameFile);
+                    auxItems.add(nameFile);// Adds the name in the array aux
 
                     // Add this object into the ArrayList myList
                     adapter.add(ld);
@@ -490,23 +491,29 @@ public class ListFiles extends AppCompatActivity {
 
         }
 
-        if(isPlaying && (tabSelected == auxtabSelected)){
+        if(isPlaying && (tabSelected == auxtabSelected)){ // if play and auxtabSelected
 
-            playList pl = (playList) adapter.get(position);
-            pl.setImgResId(img);
+            playList pl = (playList) adapter.get(position); // get position
+            pl.setImgResId(img); // set image play
         }
-        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add
+        lv.setAdapter(new MyBaseAdapter(context,adapter)); //add names and image list view
 
 
     }
-    public int searchPosition(int auxPosition){
-        for (int i = 0; i<items.length; i++) {
 
-           if(items[i].contains(auxItems.get(auxPosition))){
-              return i;
+    ///////////////////////////////////////////
+    //                                       //
+    //     Function searchPosition()         //
+    //   search the position in the array    //
+    ///////////////////////////////////////////
+    public int searchPosition(int auxPosition){
+        for (int i = 0; i<items.length; i++) { // for items array
+
+           if(items[i].contains(auxItems.get(auxPosition))){ // if array contains file name listview
+              return i; // return position
             }
         }
-        return 0;
+        return 0; // default position
     }
 
 
