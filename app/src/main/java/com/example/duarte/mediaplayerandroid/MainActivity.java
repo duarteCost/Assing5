@@ -530,8 +530,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         updateTimeMusicThred(mediaPlayer, textViewTime);
         mediaPlayer.seekTo((int)currentTime);
         updateTimeMusicThred(mediaPlayer, textViewTime);
-        verifyNoiseThread();
-        changeVolumeWithNoise();
+        if(verifyNoise==null){
+            verifyNoiseThread();
+        }
+        if(changeVolume==null){
+            changeVolumeWithNoise();
+        }
 
     }
 
