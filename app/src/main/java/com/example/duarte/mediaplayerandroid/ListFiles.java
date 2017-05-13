@@ -152,12 +152,12 @@ public class ListFiles extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
-                if(isPlaying == false){ // if play
+                if(isPlaying == false){ // if play begin the MainActivity
                     // send variables
                     startActivity(new Intent(getApplicationContext(),MainActivity.class).putExtra("position",searchPosition(position)).putExtra("tabSelected",tabSelected).putExtra("items",items));
                     finish();
                 }
-                else // if not play
+                else // if not play return to the MainActivity
                 {
                     Intent returnMainAct = new Intent();
                     // send variables
