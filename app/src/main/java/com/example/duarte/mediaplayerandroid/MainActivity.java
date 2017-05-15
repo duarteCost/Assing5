@@ -596,12 +596,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            verifyNoiseThread();
-            changeVolumeWithNoise();
+           /* verifyNoiseThread();
+            changeVolumeWithNoise();*/
 
             // chnage states
             auxBtnToOpenMic = false;
-            stateRecorder = true;
+            stateRecorder = false;
 
 
         }else if(auxBtnToOpenMic){ // didn't you get the speech result
@@ -815,12 +815,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                     float deltaX = x2 - x1;
                     if (Math.abs(deltaX) > MIN_DISTANCE) { // if swipe
 
-                        if (deltaX < 0) { // swipe left to right it goes to the next song or video
-                            nextMusic(null);
+                        if (deltaX < 0) { // swipe left to right it goes to the previous song or video
+                            prevMusic(null);
                             return true;
                         }
-                        if (deltaX > 0) { // swipe right to left it goes to the previous song or video
-                            prevMusic(null);
+                        if (deltaX > 0) { // swipe right to left it goes to the next song or video
+                            nextMusic(null);
                             return true;
                         }
 
@@ -915,11 +915,17 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }else if(voiceInText.get(0).contains("prev")){// if word is "prev"
             prevMusic(null); // prev
         }else if(voiceInText.get(0).contains("play")){ // if word is "play"
-            search(voiceInText.get(0)); // search file name
+            if(voiceInText.get(0).length()>4) {
+                search(voiceInText.get(0)); // search file name
+            }else {
+                if (!isPlaying){
+                    checkState(null);
+                }
+            }
         }else if(voiceInText.get(0).contains("stop")){ // if word is "stop"
-            checkState(null); // stop
+           // stop
         }else {
-            if(isPlaying){
+            if(!isPlaying){
                 checkState(null);
             }
         }
@@ -1027,6 +1033,8 @@ public void ORIENTATION_PORTRAIT(){ // Adds buttons and NOT FULLSCREEN
         layoutVideo.setLayoutParams(lp);
 
     }
+
+
 
 }
 
