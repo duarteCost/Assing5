@@ -4,6 +4,11 @@ package com.example.duarte.mediaplayerandroid;
  * Created by duarte on 14/04/2017.
  */
 public class playList {
+
+    ///////////////////////////////
+    //Define the list structure  //
+    ///////////////////////////////
+
     String MusicTitle;
     int imgResId;
 

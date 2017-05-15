@@ -53,18 +53,18 @@ import static android.R.attr.delay;
 
 public class MainActivity extends Activity implements MediaPlayer.OnPreparedListener, MediaPlayer.OnSeekCompleteListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
-    private MediaPlayer player;
-    private boolean isPlaying;
-    private TextView textViewTime;
+    private MediaPlayer player;  //music and video reproducer
+    private boolean isPlaying;  // control if the player is playing
+    private TextView textViewTime; //show the music/video time's
     private TextView musicTitle;
-    private long duration;
-    private long currentTime;
-    private int maxPosition;
-    private volatile Thread playingMusic;
-    private volatile Thread changeVolume;
-    private volatile Thread verifyNoise;
-    private MediaRecorder recorder;
-    private double amplitudeDb;
+    private long duration;     //music/video duration
+    private long currentTime;   //music/video current time
+    private int maxPosition;    //number of list elements
+    private volatile Thread playingMusic;  //control the players status (i.e music/video current time)
+    private volatile Thread changeVolume;  // change the volume according the environment noise
+    private volatile Thread verifyNoise;   //control the environment noise
+    private MediaRecorder recorder;    //allow mic acess
+    private double amplitudeDb;     //value of noise amplitude in one certain moment
     private SeekBar volumeSeekbar = null;
     private AudioManager audioManager = null;
     private SeekBar seekBar; // seekBar time
@@ -85,10 +85,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     private static final int MIN_DISTANCE = 500; //swipe DISTANCE
 
     private Button playPause;
-    private int position;
-    private int countT = 0;
-    private String[] items;
-    private double amplitudeDbC = 0;
+    private int position;   //Control the current item
+    private int countT = 0;  //number of noise measurements
+    private String[] items;  //list of items in sd_card
+    private double amplitudeDbC = 0;  // sum of noise values
     private int tabSelected; // tab Selected on tableview
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +97,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
         setContentView(R.layout.activity_main);
 
+
+        //get some variables from the ListFiles
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         items = bundle.getStringArray("items");
@@ -121,6 +123,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         handleSeekbar(); // initialize time Seekbar
         seekBar.setMax((int) 20 / 1000); // initialize length Seekbar
 
+        /*
         if(savedInstanceState != null){
             if(savedInstanceState != null){
                 duration = savedInstanceState.getLong("duration");
@@ -139,8 +142,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }else
         {
             playMusic(null);
-        }
+        }*/
+        playMusic(null);
 
+        //Initialize the recorder and allow mic access
         recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
@@ -163,7 +168,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
 
 
-    public void onSaveInstanceState(Bundle output){
+    /*public void onSaveInstanceState(Bundle output){
         super.onSaveInstanceState(output);
         output.putLong("duration", duration);
         output.putLong("currentTime", currentTime);
@@ -175,8 +180,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         //output.putDouble("amplitudeDbC", amplitudeDbC);
 
        // recorder.stop();
-    }
+    }*/
 
+    //////////////////////////
+    // When the activity is //
+    // destroyed            //
+    //////////////////////////
     public void onDestroy(){
         super.onDestroy();
         if(player != null){
@@ -187,6 +196,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
     }
 
+    //////////////////////////
+    // When the activity is //
+    // paused               //
+    //////////////////////////
     public void onPause(){
         isPlaying = false;
         super.onPause();
@@ -196,11 +209,18 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
     }
 
+    //////////////////////////
+    // When the activity is //
+    // stoped               //
+    //////////////////////////
     public void onStop(){
         isPlaying = false;
         super.onStop();
     }
 
+    //////////////////////////
+    // Begins the player    //
+    //////////////////////////
     public void playMusic(View view){
         if(player == null){
             try {
@@ -236,12 +256,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             videoPlay ();// Jorge
             updateTimeMusicThred(player, textViewTime);
 
-
-
-
         }
     }
 
+    //////////////////////////
+    // Stop's music and     //
+    // with some threads    //
+    //////////////////////////
     public void stopMusic(View view){
         if(player != null){
             player.stop();
@@ -261,6 +282,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
     }
 
+    //////////////////////////
+    // Pause music          //
+    //////////////////////////
     public void pauseMusic(View view){
         if(player != null){
             player.pause();
@@ -268,6 +292,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
     }
 
+    //////////////////////////
+    // Pause music and      //
+    // change the play/     //
+    // pause button         //
+    //////////////////////////
     public void checkState(View view){
         if(isPlaying){
             isPlaying = false;
@@ -288,6 +317,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
     }
 
+    ///////////////////////////
+    // Check if the next/prev//
+    // exists                //
+    ///////////////////////////
     public void verifyArray(String state){
         if(state.equals("next"))
         {
@@ -316,8 +349,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }
     }
 
+    //////////////////////////
+    // Change item to the   //
+    // next                 //
+    //////////////////////////
     public void nextMusic(View view){
-
 
         if(isPlaying){
             stopMusic(null);
@@ -334,6 +370,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         playMusic(null);
     }
 
+    //////////////////////////
+    // Change item to the   //
+    // prev                //
+    //////////////////////////
     public void prevMusic(View view){
         if(isPlaying){
             isPlaying = false;
@@ -350,16 +390,20 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         playMusic(null);
     }
 
+    //////////////////////////
+    // Go back to the List  //
+    //////////////////////////
     public void returnMenu(View view){
         Intent returnListAct = new Intent(this, ListFiles.class);
         returnListAct.putExtra("isPlaying", isPlaying).putExtra("tabSelected",tabSelected).putExtra("position", position);
         startActivityForResult(returnListAct, 1);
         //btnToOpenMic();
-
-
-
     }
 
+    //////////////////////////
+    // Update music status  //
+    // and change automa.   //
+    //////////////////////////
     public void updateTimeMusicThred(final long duration, final long currentTime, final TextView view){
         runOnUiThread(new Runnable() {
             @Override
@@ -392,6 +436,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         });
     }
 
+    //////////////////////////
+    // Control the update   //
+    // status thread        //
+    //////////////////////////
     public void updateTimeMusicThred(final MediaPlayer mediaPlayer, final TextView view){
 
         this.playingMusic = new Thread(new Runnable() {
@@ -411,6 +459,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
     }
 
+    //////////////////////////
+    // Respond the volume   //
+    // change               //
+    //////////////////////////
     private void setVolume() {
         new Thread(new Runnable() {
             @Override
@@ -439,14 +491,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
                                     progress, 0);
                         }
                     });
-                    /*if(countT >= 5) {
-                        Thread.sleep(10000);
-                        countT = countT +1;
-                    }
-                    else {
-                        Thread.sleep(1000);
-                        countT = countT +1;
-                    }*/
                     Thread.sleep(1000);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -457,6 +501,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         }).start();
 
     }
+
     //Listners
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
@@ -469,6 +514,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         return false;
     }
 
+    /////////////////////////////////////////
+    // Measures the occurrence of noise    //
+    // and filter the -infinity values     //
+    /////////////////////////////////////////
     public void verifyNoiseThread(){
         this.verifyNoise = new Thread(new Runnable() {
             @Override
@@ -491,6 +540,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         verifyNoise.start();
     }
 
+    ////////////////////////////////////////////////////////
+    // Calculate the noise media and update the volume    //
+    ////////////////////////////////////////////////////////
     public void changeVolumeWithNoise(){
 
         this.changeVolume = new Thread(new Runnable() {
@@ -521,6 +573,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         changeVolume.start();
     }
 
+    ////////////////////////////////////////////////////////
+    // Initializes the player and all necessary thread's  //
+    ////////////////////////////////////////////////////////
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
         isPlaying = true;
@@ -548,7 +603,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-
+        /////////////////////////////////////////////////
+        // when the listFiles return to Main Activity  //
+        /////////////////////////////////////////////////
         if (requestCode == 1) {
             if(resultCode == Activity.RESULT_OK){
                 isPlaying=data.getBooleanExtra("isPlaying",isPlaying);

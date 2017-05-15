@@ -40,6 +40,11 @@ public class MyBaseAdapter extends BaseAdapter {
         return 0;
     }
 
+
+    //////////////////////////////////////
+    //Change the layout of the list view//
+    //elements                          //
+    //////////////////////////////////////
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         MyViewHolder mViewHolder;
@@ -59,6 +64,10 @@ public class MyBaseAdapter extends BaseAdapter {
 
         return convertView;
     }
+
+    //////////////////////////////////////
+    //Change elements value             //
+    //////////////////////////////////////
     private class MyViewHolder{
         TextView tvTitle;
         ImageView ivIcon;

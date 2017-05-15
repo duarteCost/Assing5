@@ -19,6 +19,12 @@ import java.io.File;
 import java.util.ArrayList;
 
 public class ActivityList extends AppCompatActivity {
+    /////////////////////
+    //Activity not used//
+    /////////////////////
+
+
+
     private ListView lv;
     private String[] items;
     private boolean isPlaying = false;
@@ -30,7 +36,7 @@ public class ActivityList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
 
-
+        //Activity not used
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         if(bundle != null){
