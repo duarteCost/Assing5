@@ -21,7 +21,6 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ActivityList"></activity>
         <activity
             android:name=".ListFiles"
             android:label="@string/title_activity_list_files"
@@ -38,12 +37,6 @@
             android:label="@string/app_name">
         </activity>
 
-        <service
-            android:name="ServicePlayer"
-            android:enabled="true"
-            android:exported="false">
-
-        </service>
     </application>
 
 </manifest>

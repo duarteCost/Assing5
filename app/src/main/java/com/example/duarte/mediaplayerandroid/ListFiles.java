@@ -101,7 +101,7 @@ public class ListFiles extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-       tabLayout.getTabAt(auxtabSelected).select(); // change tab selected
+
        
 
 
@@ -144,7 +144,7 @@ public class ListFiles extends AppCompatActivity {
         getFiles("all"); // get files sd
 
         initSearch();// start Search
-
+        tabLayout.getTabAt(auxtabSelected).select(); // change tab selected
 
         // On Item Click Listener
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {

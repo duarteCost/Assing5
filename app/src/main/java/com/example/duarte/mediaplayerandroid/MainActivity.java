@@ -123,26 +123,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
         handleSeekbar(); // initialize time Seekbar
         seekBar.setMax((int) 20 / 1000); // initialize length Seekbar
 
-        /*
-        if(savedInstanceState != null){
-            if(savedInstanceState != null){
-                duration = savedInstanceState.getLong("duration");
-                currentTime = savedInstanceState.getLong("currentTime");
-                isPlaying = savedInstanceState.getBoolean("isPlaying");
-                maxPosition = savedInstanceState.getInt("maxPosition");
-                position = savedInstanceState.getInt("position");
-                //countT = savedInstanceState.getInt("countT");
-                //amplitudeDb = savedInstanceState.getDouble("amplitudeDb");
-                //amplitudeDbC = savedInstanceState.getDouble("amplitudeDbC");
-                if(isPlaying){
-                    playMusic(null);
-                }
-
-            }
-        }else
-        {
-            playMusic(null);
-        }*/
         playMusic(null);
 
         //Initialize the recorder and allow mic access
@@ -168,19 +148,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
 
 
 
-    /*public void onSaveInstanceState(Bundle output){
-        super.onSaveInstanceState(output);
-        output.putLong("duration", duration);
-        output.putLong("currentTime", currentTime);
-        output.putBoolean("isPlaying", true);
-        output.putInt("maxPosition", maxPosition);
-        output.putInt("position", position);
-        //output.putInt("countT", countT);
-        //output.putDouble("amplitudeDb", amplitudeDb);
-        //output.putDouble("amplitudeDbC", amplitudeDbC);
 
-       // recorder.stop();
-    }*/
 
     //////////////////////////
     // When the activity is //
@@ -224,10 +192,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
     public void playMusic(View view){
         if(player == null){
             try {
-                //raw
-                /*player = MediaPlayer.create(MainActivity.this, R.raw.music1);
-                player.start();*/
-                //sdCard
+
                 File sdCard = getStoragePath();
                 File file = new File(sdCard, items[position]);
                 musicTitle = (TextView)findViewById(R.id.musicTitle);
@@ -253,7 +218,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             player.start();
             isPlaying = true;
 
-            videoPlay ();// Jorge
+            videoPlay ();
             updateTimeMusicThred(player, textViewTime);
 
         }
@@ -653,8 +618,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnPreparedList
             } catch (IOException e) {
                 e.printStackTrace();
             }
-           /* verifyNoiseThread();
-            changeVolumeWithNoise();*/
+       
 
             // chnage states
             auxBtnToOpenMic = false;
